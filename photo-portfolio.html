@@ -23,7 +23,7 @@
   .top-row{display:flex; align-items:center; justify-content:space-between;}
   .back{font-family:var(--mono); font-size:11.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-dim); display:flex; align-items:center; gap:8px; transition:color .2s;}
   .back:hover{color:var(--ink);}
-  .brand img{height:20px;}
+  .brand img{height:28px;}
 
   .page-head{padding:70px 0 50px;}
   .kicker{font-family:var(--mono); font-size:11.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-dim); display:block; margin-bottom:18px;}
@@ -51,6 +51,36 @@
   .g7{background:linear-gradient(155deg,#bcb9b0,#847f78 60%);}
   .g8{background:linear-gradient(155deg,#d4d1c8,#a5a199 60%);}
   .g9{background:linear-gradient(155deg,#98958c,#68655f 60%);}
+
+  .tile{cursor:pointer;}
+
+  /* ---------- lightbox ---------- */
+  .lightbox-overlay{
+    position:fixed; inset:0; z-index:500;
+    background:rgba(19,19,17,0.55);
+    backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none; transition:opacity .35s ease;
+    padding:40px;
+  }
+  .lightbox-overlay.open{opacity:1; pointer-events:all;}
+  .lightbox-box{
+    width:min(760px,90vw); max-height:86vh; aspect-ratio:4/5; position:relative;
+    border-radius:3px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.35);
+    transform:scale(0.96); transition:transform .35s ease;
+  }
+  .lightbox-overlay.open .lightbox-box{transform:scale(1);}
+  .lightbox-box::after{content:''; position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.55), transparent 55%);}
+  .lightbox-caption{position:absolute; left:26px; bottom:24px; z-index:2;}
+  .lightbox-caption .lcat{font-family:var(--mono); font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:#e8e6df; display:block; margin-bottom:8px; font-weight:600;}
+  .lightbox-caption .ltitle{font-family:var(--display); font-weight:800; font-size:24px; color:#f7f6f2;}
+  .lightbox-close{
+    position:absolute; top:28px; right:28px; z-index:501;
+    width:44px; height:44px; border-radius:50%; border:1.5px solid rgba(19,19,17,0.3);
+    background:var(--bg); color:var(--ink); font-family:var(--body); font-size:18px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; transition:background .2s, color .2s;
+  }
+  .lightbox-close:hover{background:var(--ink); color:var(--bg);}
 
   footer{border-top:1px solid var(--line); padding:30px 0; font-family:var(--mono); font-size:11px; color:var(--ink-dim); text-align:center;}
 
@@ -85,16 +115,44 @@
 </div>
 
 <div class="grid">
-  <div class="tile g1"><div class="info"><span class="cat">Brand</span><span class="ttl">브랜드 캠페인 촬영</span></div></div>
-  <div class="tile g2"><div class="info"><span class="cat">Product</span><span class="ttl">제품 카탈로그 촬영</span></div></div>
-  <div class="tile g3"><div class="info"><span class="cat">Profile</span><span class="ttl">대표 프로필 촬영</span></div></div>
-  <div class="tile g4"><div class="info"><span class="cat">Lifestyle</span><span class="ttl">라이프스타일 화보</span></div></div>
-  <div class="tile g5"><div class="info"><span class="cat">Event</span><span class="ttl">브랜드 행사 기록</span></div></div>
-  <div class="tile g6"><div class="info"><span class="cat">Brand</span><span class="ttl">쇼룸 오프닝 촬영</span></div></div>
-  <div class="tile g7"><div class="info"><span class="cat">Product</span><span class="ttl">신제품 런칭 비주얼</span></div></div>
-  <div class="tile g8"><div class="info"><span class="cat">Profile</span><span class="ttl">아티스트 포트레이트</span></div></div>
-  <div class="tile g9"><div class="info"><span class="cat">Lifestyle</span><span class="ttl">공간 &amp; 라이프 화보</span></div></div>
+  <div class="tile g1" data-bg="g1" data-cat="Brand" data-title="브랜드 캠페인 촬영" onclick="openLightbox(this)"><div class="info"><span class="cat">Brand</span><span class="ttl">브랜드 캠페인 촬영</span></div></div>
+  <div class="tile g2" data-bg="g2" data-cat="Product" data-title="제품 카탈로그 촬영" onclick="openLightbox(this)"><div class="info"><span class="cat">Product</span><span class="ttl">제품 카탈로그 촬영</span></div></div>
+  <div class="tile g3" data-bg="g3" data-cat="Profile" data-title="대표 프로필 촬영" onclick="openLightbox(this)"><div class="info"><span class="cat">Profile</span><span class="ttl">대표 프로필 촬영</span></div></div>
+  <div class="tile g4" data-bg="g4" data-cat="Lifestyle" data-title="라이프스타일 화보" onclick="openLightbox(this)"><div class="info"><span class="cat">Lifestyle</span><span class="ttl">라이프스타일 화보</span></div></div>
+  <div class="tile g5" data-bg="g5" data-cat="Event" data-title="브랜드 행사 기록" onclick="openLightbox(this)"><div class="info"><span class="cat">Event</span><span class="ttl">브랜드 행사 기록</span></div></div>
+  <div class="tile g6" data-bg="g6" data-cat="Brand" data-title="쇼룸 오프닝 촬영" onclick="openLightbox(this)"><div class="info"><span class="cat">Brand</span><span class="ttl">쇼룸 오프닝 촬영</span></div></div>
+  <div class="tile g7" data-bg="g7" data-cat="Product" data-title="신제품 런칭 비주얼" onclick="openLightbox(this)"><div class="info"><span class="cat">Product</span><span class="ttl">신제품 런칭 비주얼</span></div></div>
+  <div class="tile g8" data-bg="g8" data-cat="Profile" data-title="아티스트 포트레이트" onclick="openLightbox(this)"><div class="info"><span class="cat">Profile</span><span class="ttl">아티스트 포트레이트</span></div></div>
+  <div class="tile g9" data-bg="g9" data-cat="Lifestyle" data-title="공간 &amp; 라이프 화보" onclick="openLightbox(this)"><div class="info"><span class="cat">Lifestyle</span><span class="ttl">공간 &amp; 라이프 화보</span></div></div>
 </div>
+
+<div class="lightbox-overlay" id="lightbox" onclick="if(event.target===this)closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()" aria-label="닫기">✕</button>
+  <div class="lightbox-box" id="lightboxBox">
+    <div class="lightbox-caption">
+      <span class="lcat" id="lightboxCat"></span>
+      <span class="ltitle" id="lightboxTitle"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openLightbox(el){
+    var box = document.getElementById('lightboxBox');
+    box.className = 'lightbox-box ' + el.getAttribute('data-bg');
+    document.getElementById('lightboxCat').textContent = el.getAttribute('data-cat');
+    document.getElementById('lightboxTitle').textContent = el.getAttribute('data-title');
+    document.getElementById('lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox(){
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') closeLightbox();
+  });
+</script>
 
 <footer>※ 실제 사진으로 교체 예정입니다 — © 2026 PROJECT i</footer>
 
