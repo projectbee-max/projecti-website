@@ -239,18 +239,32 @@
     return {cat: cat, title: name || cat};
   }
 
-  function photoPath(folder, n){
-    return PHOTO_BASE + encodeURIComponent(folder) + '/' + n + '.jpg';
+  // 대소문자/포맷이 섞여 있어도(1.JPG, 1.jpg, 1.png 등) 알아서 찾도록 순서대로 시도합니다.
+  var EXTENSIONS = ['jpg', 'JPG', 'jpeg', 'JPEG', 'png', 'PNG'];
+
+  function photoPath(folder, n, ext){
+    return PHOTO_BASE + encodeURIComponent(folder) + '/' + n + '.' + ext;
+  }
+
+  function tryLoadPhoto(folder, n, extIndex, onFound, onNotFound){
+    if(extIndex >= EXTENSIONS.length){ onNotFound(); return; }
+    var path = photoPath(folder, n, EXTENSIONS[extIndex]);
+    var img = new Image();
+    img.onload = function(){ onFound(path); };
+    img.onerror = function(){ tryLoadPhoto(folder, n, extIndex + 1, onFound, onNotFound); };
+    img.src = path;
   }
 
   function countPhotos(folder, cb){
     var found = [];
     function tryNext(n){
       if(n > MAX_PHOTOS_PER_FOLDER){ cb(found); return; }
-      var img = new Image();
-      img.onload = function(){ found.push(photoPath(folder, n)); tryNext(n+1); };
-      img.onerror = function(){ cb(found); };
-      img.src = photoPath(folder, n);
+      tryLoadPhoto(folder, n, 0, function(path){
+        found.push(path);
+        tryNext(n + 1);
+      }, function(){
+        cb(found);
+      });
     }
     tryNext(1);
   }
