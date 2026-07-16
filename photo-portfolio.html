@@ -257,6 +257,13 @@
       if(e.key === 'ArrowLeft') prevImg();
     }
   });
+
+  // 홈페이지에서 ?p=brand 같은 형태로 들어오면 해당 프로젝트를 바로 열어줍니다.
+  (function(){
+    var params = new URLSearchParams(window.location.search);
+    var p = params.get('p');
+    if(p && galleries[p]) openGallery(p);
+  })();
 </script>
 
 <footer>※ 대표 이미지 → 여러 장의 사진 → 클릭한 사진 확대 순서로 이어지는 구조입니다. 실제 사진으로 교체 예정입니다 — © 2026 PROJECT i</footer>

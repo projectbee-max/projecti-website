@@ -181,6 +181,16 @@
   document.addEventListener('keydown', function(e){
     if(e.key === 'Escape') closeVideo();
   });
+
+  // 홈페이지에서 ?v=videoId 형태로 들어오면 해당 영상을 바로 열어줍니다.
+  (function(){
+    var params = new URLSearchParams(window.location.search);
+    var v = params.get('v');
+    if(v){
+      var card = document.querySelector('[data-video-id="' + v + '"]');
+      if(card) openVideo(card);
+    }
+  })();
 </script>
 
 <footer>© 2026 PROJECT i</footer>

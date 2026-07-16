@@ -117,14 +117,14 @@
   .pf-grid{display:grid; grid-template-columns:1fr 1fr; gap:2px; background:var(--line);}
   @media (max-width:700px){.pf-grid{grid-template-columns:1fr;}}
   .pf-tile{aspect-ratio:16/11; position:relative; overflow:hidden; display:block;}
+  .pf-tile .lab-cat{position:absolute; left:16px; bottom:38px; z-index:2; font-family:var(--mono); font-size:10px; letter-spacing:0.05em; color:#d8d6cf; text-transform:uppercase;}
   .pf-tile .lab{position:absolute; left:16px; bottom:16px; z-index:2; font-family:var(--mono); font-size:10.5px; letter-spacing:0.04em; color:#f5f5f2; text-transform:uppercase;}
   .pf-tile::after{content:''; position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.6), transparent 55%);}
   .pf-tile.film .play{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:2; width:52px; height:52px; border:1.5px solid #f5f5f2; border-radius:50%; display:flex; align-items:center; justify-content:center;}
   .pf-tile.film .play::before{content:''; border-left:12px solid #f5f5f2; border-top:7px solid transparent; border-bottom:7px solid transparent; margin-left:3px;}
-  .ph1{background:linear-gradient(150deg,#c3c0b7,#8e8a82 60%);}
-  .ph2{background:linear-gradient(150deg,#b3b0a7,#7d7972 60%);}
-  .fm1{background:linear-gradient(150deg,#a8a59c,#726e67 60%);}
-  .fm2{background:linear-gradient(150deg,#bcb9b0,#847f78 60%);}
+  .ph1{background:linear-gradient(155deg,#c9c6bd,#928e86 60%);}
+  .ph2{background:linear-gradient(155deg,#b8b5ac,#807c75 60%);}
+  .fm1, .fm2{background-size:cover; background-position:center; background-color:#c9c6bd;}
 
   .flow{display:grid; grid-template-columns:repeat(5,1fr); border-top:1px solid var(--line); border-left:1px solid var(--line);}
   @media (max-width:860px){.flow{grid-template-columns:1fr; border-left:none;}}
@@ -219,6 +219,98 @@
   .field label{font-size:11.5px; font-weight:600;}
   .field input, .field textarea, .field select{font-size:16px; font-weight:500;}
   .submit-btn{font-weight:700;}
+
+  /* ---------- inline preview popups (photo gallery + video) ---------- */
+  .pf-tile{cursor:pointer;}
+
+  .gallery-overlay{
+    position:fixed; inset:0; z-index:400;
+    background:rgba(19,19,17,0.5);
+    backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none; transition:opacity .3s ease;
+    padding:40px;
+  }
+  .gallery-overlay.open{opacity:1; pointer-events:all;}
+  .gallery-box{
+    width:min(980px,92vw); max-height:86vh; overflow-y:auto;
+    background:var(--bg); border-radius:4px; padding:40px;
+    box-shadow:0 40px 100px rgba(0,0,0,0.35);
+    transform:scale(0.97); transition:transform .3s ease;
+  }
+  .gallery-overlay.open .gallery-box{transform:scale(1);}
+  .gallery-head{margin-bottom:26px;}
+  .gallery-head .gcat{font-family:var(--mono); font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-dim); display:block; margin-bottom:8px; font-weight:600;}
+  .gallery-head .gtitle{font-family:var(--display); font-weight:800; font-size:26px;}
+  .gallery-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
+  @media (max-width:640px){.gallery-grid{grid-template-columns:repeat(2,1fr);}}
+  .gallery-thumb{aspect-ratio:4/5; border-radius:2px; cursor:pointer; transition:opacity .2s, transform .2s;}
+  .gallery-thumb:hover{opacity:0.85; transform:scale(0.98);}
+
+  .single-overlay{
+    position:fixed; inset:0; z-index:600;
+    background:rgba(19,19,17,0.55);
+    backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none; transition:opacity .3s ease;
+    padding:40px;
+  }
+  .single-overlay.open{opacity:1; pointer-events:all;}
+  .single-box{
+    width:min(760px,90vw); max-height:86vh; aspect-ratio:4/5; position:relative;
+    border-radius:3px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.4);
+    transform:scale(0.96); transition:transform .3s ease;
+  }
+  .single-overlay.open .single-box{transform:scale(1);}
+  .single-box::after{content:''; position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.55), transparent 55%);}
+  .single-caption{position:absolute; left:26px; bottom:24px; z-index:2;}
+  .single-caption .lcat{font-family:var(--mono); font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:#e8e6df; display:block; margin-bottom:8px; font-weight:600;}
+  .single-caption .ltitle{font-family:var(--display); font-weight:800; font-size:24px; color:#f7f6f2;}
+  .single-counter{position:absolute; right:26px; bottom:24px; z-index:2; font-family:var(--mono); font-size:11.5px; color:#e8e6df; font-weight:600;}
+
+  .overlay-close{
+    position:absolute; top:28px; right:28px; z-index:601;
+    width:44px; height:44px; border-radius:50%; border:1.5px solid rgba(19,19,17,0.3);
+    background:var(--bg); color:var(--ink); font-family:var(--body); font-size:18px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; transition:background .2s, color .2s;
+  }
+  .overlay-close:hover{background:var(--ink); color:var(--bg);}
+  .nav-arrow{
+    position:absolute; top:50%; transform:translateY(-50%); z-index:601;
+    width:46px; height:46px; border-radius:50%; border:1.5px solid rgba(245,245,242,0.5);
+    background:rgba(19,19,17,0.35); color:#f5f5f2; font-size:18px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; transition:background .2s;
+  }
+  .nav-arrow:hover{background:rgba(19,19,17,0.6);}
+  .nav-prev{left:14px;} .nav-next{right:14px;}
+
+  .g1{background:linear-gradient(155deg,#c9c6bd,#928e86 60%);}
+  .g2{background:linear-gradient(155deg,#b8b5ac,#807c75 60%);}
+  .g3{background:linear-gradient(155deg,#aeaba2,#767268 60%);}
+  .g4{background:linear-gradient(155deg,#d0cdc4,#a09c93 60%);}
+  .g5{background:linear-gradient(155deg,#c2bfb6,#8b877f 60%);}
+  .g6{background:linear-gradient(155deg,#a29f96,#6f6b64 60%);}
+  .g7{background:linear-gradient(155deg,#bcb9b0,#847f78 60%);}
+  .g8{background:linear-gradient(155deg,#d4d1c8,#a5a199 60%);}
+  .g9{background:linear-gradient(155deg,#98958c,#68655f 60%);}
+
+  .video-lightbox{
+    position:fixed; inset:0; z-index:600;
+    background:rgba(19,19,17,0.6);
+    backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none; transition:opacity .35s ease;
+    padding:40px;
+  }
+  .video-lightbox.open{opacity:1; pointer-events:all;}
+  .video-box{
+    width:min(920px,92vw); aspect-ratio:16/9; position:relative;
+    border-radius:3px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.4);
+    background:#100f0d;
+    transform:scale(0.96); transition:transform .35s ease;
+  }
+  .video-lightbox.open .video-box{transform:scale(1);}
+  .video-box iframe{width:100%; height:100%; border:none; display:none;}
 </style>
 </head>
 <body>
@@ -286,16 +378,16 @@
 
     <div class="pf-sub-head reveal"><h3>Photography</h3><a href="photo-portfolio.html" class="more-link">MORE →</a></div>
     <div class="pf-grid reveal">
-      <a href="photo-portfolio.html" class="pf-tile ph1"><span class="lab">Brand · 제품 촬영</span></a>
-      <a href="photo-portfolio.html" class="pf-tile ph2"><span class="lab">Portrait · 인물 촬영</span></a>
+      <div class="pf-tile ph1" onclick="openGallery('brand')"><span class="lab-cat">Brand</span><span class="lab">브랜드 캠페인 촬영</span></div>
+      <div class="pf-tile ph2" onclick="openGallery('product')"><span class="lab-cat">Product</span><span class="lab">제품 카탈로그 촬영</span></div>
     </div>
 
     <div class="pf-sub-head reveal"><h3>Film</h3><a href="film-portfolio.html" class="more-link">MORE →</a></div>
     <div class="pf-grid reveal">
-      <a href="film-portfolio.html" class="pf-tile film fm1"><div class="play"></div><span class="lab">Brand Film</span></a>
-      <a href="film-portfolio.html" class="pf-tile film fm2"><div class="play"></div><span class="lab">Interview Film</span></a>
+      <div class="pf-tile film fm1" data-video-id="jgpP02LC8-M" onclick="openVideo(this)" style="background-image:url('https://img.youtube.com/vi/jgpP02LC8-M/hqdefault.jpg')"><div class="play"></div><span class="lab-cat">Brand Film</span><span class="lab">광주광역시 광산구 홍보영상</span></div>
+      <div class="pf-tile film fm2" data-video-id="kzvBDyGFwEs" onclick="openVideo(this)" style="background-image:url('https://img.youtube.com/vi/kzvBDyGFwEs/hqdefault.jpg')"><div class="play"></div><span class="lab-cat">Brand Film</span><span class="lab">주식회사 망고컴 배석세포 제조 공정 홍보영상</span></div>
     </div>
-    <p class="bts-note reveal" style="margin-top:26px;">※ MORE 클릭 시 새 창에서 사진/영상 포트폴리오 전체 목록이 열립니다. 영상은 썸네일 클릭 시 유튜브로 연결됩니다.</p>
+    <p class="bts-note reveal" style="margin-top:26px;">※ 사진/영상 클릭 시 이 페이지에서 바로 보여요. 전체 목록은 MORE에서 확인할 수 있어요.</p>
   </div>
 </section>
 
@@ -373,18 +465,18 @@
       <p class="section-note">좋은 프로젝트는 좋은 대화에서 시작됩니다.</p>
     </div>
     <div class="contact-grid">
-      <form class="contact-form reveal" id="contactForm">
+      <form class="contact-form reveal" id="contactForm" action="https://formspree.io/f/xbdndplj" method="POST">
         <div class="field">
           <label for="name">이름</label>
-          <input id="name" type="text" placeholder="홍길동" required>
+          <input id="name" name="이름" type="text" placeholder="홍길동" required>
         </div>
         <div class="field">
           <label for="email">이메일</label>
-          <input id="email" type="email" placeholder="you@email.com" required>
+          <input id="email" name="이메일" type="email" placeholder="you@email.com" required>
         </div>
         <div class="field">
           <label for="type">프로젝트 유형</label>
-          <select id="type">
+          <select id="type" name="프로젝트 유형">
             <option>Personal Project</option>
             <option>Brand Project</option>
             <option>Business Project</option>
@@ -394,8 +486,9 @@
         </div>
         <div class="field">
           <label for="message">프로젝트 이야기</label>
-          <textarea id="message" placeholder="어떤 프로젝트를 시작하려 하시는지, 목적과 일정을 자유롭게 남겨주세요."></textarea>
+          <textarea id="message" name="프로젝트 이야기" placeholder="어떤 프로젝트를 시작하려 하시는지, 목적과 일정을 자유롭게 남겨주세요."></textarea>
         </div>
+        <input type="hidden" name="_subject" value="[Project i] 새 프로젝트 문의가 도착했습니다">
         <button type="submit" class="submit-btn">문의 보내기</button>
       </form>
       <dl class="contact-info reveal">
@@ -421,6 +514,36 @@
 
 <div class="toast" id="toast">문의가 접수되었습니다. 빠르게 연락드릴게요.</div>
 
+<div class="gallery-overlay" id="galleryOverlay" onclick="if(event.target===this)closeGallery()">
+  <button class="overlay-close" onclick="closeGallery()" aria-label="닫기">✕</button>
+  <div class="gallery-box">
+    <div class="gallery-head">
+      <span class="gcat" id="galleryCat"></span><span class="gtitle" id="galleryTitle"></span>
+    </div>
+    <div class="gallery-grid" id="galleryGrid"></div>
+  </div>
+</div>
+
+<div class="single-overlay" id="singleOverlay" onclick="if(event.target===this)closeSingle()">
+  <button class="overlay-close" onclick="closeSingle()" aria-label="닫기">✕</button>
+  <button class="nav-arrow nav-prev" onclick="prevImg(event)" aria-label="이전 사진">‹</button>
+  <button class="nav-arrow nav-next" onclick="nextImg(event)" aria-label="다음 사진">›</button>
+  <div class="single-box" id="singleBox">
+    <div class="single-caption">
+      <span class="lcat" id="singleCat"></span>
+      <span class="ltitle" id="singleTitle"></span>
+    </div>
+    <span class="single-counter" id="singleCounter"></span>
+  </div>
+</div>
+
+<div class="video-lightbox" id="videoLightbox" onclick="if(event.target===this)closeVideo()">
+  <button class="overlay-close" onclick="closeVideo()" aria-label="닫기">✕</button>
+  <div class="video-box">
+    <iframe id="videoFrame" title="Project i video" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+  </div>
+</div>
+
 <script>
   (function(){
     var items = document.querySelectorAll('.reveal');
@@ -434,10 +557,109 @@
 
   document.getElementById('contactForm').addEventListener('submit', function(e){
     e.preventDefault();
+    var form = e.target;
     var toast = document.getElementById('toast');
-    toast.classList.add('show');
-    setTimeout(function(){ toast.classList.remove('show'); }, 3200);
-    e.target.reset();
+
+    fetch(form.action, {
+      method: 'POST',
+      body: new FormData(form),
+      headers: { 'Accept': 'application/json' }
+    }).then(function(response){
+      if(response.ok){
+        toast.textContent = '문의가 접수되었습니다. 빠르게 연락드릴게요.';
+        form.reset();
+      } else {
+        toast.textContent = '전송에 실패했어요. 잠시 후 다시 시도해주세요.';
+      }
+      toast.classList.add('show');
+      setTimeout(function(){ toast.classList.remove('show'); }, 3200);
+    }).catch(function(){
+      toast.textContent = '전송에 실패했어요. 잠시 후 다시 시도해주세요.';
+      toast.classList.add('show');
+      setTimeout(function(){ toast.classList.remove('show'); }, 3200);
+    });
+  });
+
+  /* ---------- photo gallery (2-layer, blurred background) ---------- */
+  var GRADS = ['g1','g2','g3','g4','g5','g6','g7','g8','g9'];
+  var galleries = {
+    brand:   {cat:'Brand',   title:'브랜드 캠페인 촬영', count:6, offset:0},
+    product: {cat:'Product', title:'제품 카탈로그 촬영', count:5, offset:2}
+  };
+  var currentImages = [], currentCat = '', currentTitle = '', currentIndex = 0;
+
+  function buildImages(offset, count){
+    var arr = [];
+    for(var i=0; i<count; i++){ arr.push(GRADS[(offset+i) % GRADS.length]); }
+    return arr;
+  }
+  function openGallery(key){
+    var g = galleries[key];
+    currentImages = buildImages(g.offset, g.count);
+    currentCat = g.cat; currentTitle = g.title;
+    document.getElementById('galleryCat').textContent = g.cat;
+    document.getElementById('galleryTitle').textContent = g.title;
+
+    var grid = document.getElementById('galleryGrid');
+    grid.innerHTML = '';
+    currentImages.forEach(function(cls, i){
+      var d = document.createElement('div');
+      d.className = 'gallery-thumb ' + cls;
+      d.onclick = function(){ openSingle(i); };
+      grid.appendChild(d);
+    });
+
+    document.getElementById('galleryOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeGallery(){
+    document.getElementById('galleryOverlay').classList.remove('open');
+    closeSingle();
+    document.body.style.overflow = '';
+  }
+  function openSingle(index){
+    currentIndex = index;
+    renderSingle();
+    document.getElementById('singleOverlay').classList.add('open');
+  }
+  function renderSingle(){
+    var box = document.getElementById('singleBox');
+    box.className = 'single-box ' + currentImages[currentIndex];
+    document.getElementById('singleCat').textContent = currentCat;
+    document.getElementById('singleTitle').textContent = currentTitle;
+    document.getElementById('singleCounter').textContent = (currentIndex+1) + ' / ' + currentImages.length;
+  }
+  function closeSingle(){
+    document.getElementById('singleOverlay').classList.remove('open');
+  }
+  function nextImg(e){ if(e) e.stopPropagation(); currentIndex = (currentIndex+1) % currentImages.length; renderSingle(); }
+  function prevImg(e){ if(e) e.stopPropagation(); currentIndex = (currentIndex-1+currentImages.length) % currentImages.length; renderSingle(); }
+
+  /* ---------- video popup (blurred background) ---------- */
+  function openVideo(el){
+    var id = el.getAttribute('data-video-id');
+    var frame = document.getElementById('videoFrame');
+    frame.src = 'https://www.youtube.com/embed/' + id + '?autoplay=1&rel=0';
+    frame.style.display = 'block';
+    document.getElementById('videoLightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeVideo(){
+    document.getElementById('videoLightbox').classList.remove('open');
+    document.getElementById('videoFrame').src = '';
+    document.body.style.overflow = '';
+  }
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){
+      if(document.getElementById('singleOverlay').classList.contains('open')) closeSingle();
+      else if(document.getElementById('galleryOverlay').classList.contains('open')) closeGallery();
+      else if(document.getElementById('videoLightbox').classList.contains('open')) closeVideo();
+    }
+    if(document.getElementById('singleOverlay').classList.contains('open')){
+      if(e.key === 'ArrowRight') nextImg();
+      if(e.key === 'ArrowLeft') prevImg();
+    }
   });
 </script>
 
