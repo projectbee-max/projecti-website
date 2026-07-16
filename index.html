@@ -629,7 +629,7 @@
   // photo-portfolio.html의 PROJECT_FOLDERS와 항상 같은 순서로 맞춰주세요.
   var HOME_PREVIEW_FOLDERS = ['1. snap_김가영', '2. f1 concept_임채원'];
   var PHOTO_BASE = 'images/photo/';
-  var MAX_PHOTOS_PER_FOLDER = 40;
+  var MAX_PHOTOS_PER_FOLDER = 25;
 
   var CROP_OVERRIDES = {
     // 'images/photo/2. f1 concept_임채원/1.jpg': 'center 10%',
@@ -646,32 +646,51 @@
     var cat = catRaw.replace(/\b\w/g, function(c){ return c.toUpperCase(); });
     return {cat: cat, title: name || cat};
   }
-  // 대소문자/포맷이 섞여 있어도(1.JPG, 1.jpg, 1.png 등) 알아서 찾도록 순서대로 시도합니다.
-  var EXTENSIONS = ['jpg', 'JPG', 'jpeg', 'JPEG', 'png', 'PNG'];
+  // 실제 파일이 .JPG(대문자)라서 이 순서로 먼저 시도합니다. 폴더마다 1번 사진에서
+  // 딱 한 번만 확장자를 확인하고, 나머지 사진들은 같은 확장자로 한꺼번에(병렬로) 확인합니다.
+  var EXTENSIONS = ['JPG', 'jpg', 'jpeg', 'JPEG', 'png', 'PNG'];
 
   function photoPath(folder, n, ext){
     return PHOTO_BASE + encodeURIComponent(folder) + '/' + n + '.' + ext;
   }
   function tryLoadPhoto(folder, n, extIndex, onFound, onNotFound){
     if(extIndex >= EXTENSIONS.length){ onNotFound(); return; }
-    var path = photoPath(folder, n, EXTENSIONS[extIndex]);
+    var ext = EXTENSIONS[extIndex];
+    var path = photoPath(folder, n, ext);
     var img = new Image();
-    img.onload = function(){ onFound(path); };
+    img.onload = function(){ onFound(path, ext); };
     img.onerror = function(){ tryLoadPhoto(folder, n, extIndex + 1, onFound, onNotFound); };
     img.src = path;
   }
   function countPhotos(folder, cb){
-    var found = [];
-    function tryNext(n){
-      if(n > MAX_PHOTOS_PER_FOLDER){ cb(found); return; }
-      tryLoadPhoto(folder, n, 0, function(path){
-        found.push(path);
-        tryNext(n + 1);
-      }, function(){
-        cb(found);
-      });
-    }
-    tryNext(1);
+    tryLoadPhoto(folder, 1, 0, function(firstPath, ext){
+      var results = [firstPath];
+      var total = MAX_PHOTOS_PER_FOLDER - 1;
+      if(total <= 0){ cb(results); return; }
+      var remaining = total;
+      var settled = new Array(MAX_PHOTOS_PER_FOLDER + 1);
+
+      for(var n = 2; n <= MAX_PHOTOS_PER_FOLDER; n++){
+        (function(n){
+          var img = new Image();
+          var path = photoPath(folder, n, ext);
+          img.onload = function(){ settled[n] = path; check(); };
+          img.onerror = function(){ settled[n] = null; check(); };
+          img.src = path;
+        })(n);
+      }
+      function check(){
+        remaining--;
+        if(remaining > 0) return;
+        for(var i = 2; i <= MAX_PHOTOS_PER_FOLDER; i++){
+          if(settled[i]) results.push(settled[i]);
+          else break;
+        }
+        cb(results);
+      }
+    }, function(){
+      cb([]);
+    });
   }
 
   var galleries = {};
