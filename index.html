@@ -95,18 +95,14 @@
   .about-lead{max-width:720px; margin-bottom:60px;}
   .about-lead p{font-size:17px; line-height:1.95; color:var(--ink-dim);}
   .about-lead p strong{color:var(--ink); font-weight:600;}
-  .bts-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:2px; background:var(--line);}
-  @media (max-width:860px){.bts-grid{grid-template-columns:repeat(2,1fr);}}
-  .bts-tile{aspect-ratio:3/4; position:relative; display:flex; align-items:flex-end; padding:16px; background-size:cover; background-position:center;}
+  .bts-duo{display:grid; grid-template-columns:2fr 3fr; gap:2px; background:var(--line); height:520px;}
+  @media (max-width:860px){.bts-duo{grid-template-columns:1fr; height:auto;}}
+  .bts-tile{position:relative; display:flex; align-items:flex-end; padding:16px; background-size:cover; background-position:center; height:100%;}
+  @media (max-width:860px){.bts-tile{aspect-ratio:4/3; height:auto;}}
   .bts-tile::after{content:''; position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.62), transparent 60%);}
   .bts-tile span{position:relative; z-index:2; font-family:var(--mono); font-size:10.5px; letter-spacing:0.05em; text-transform:uppercase; color:#f5f5f2;}
-  .t1{background:linear-gradient(160deg,#c7c5bd,#948f87 65%);}
-  .t2{background:linear-gradient(160deg,#b7b4ab,#84807a 65%);}
-  .t3{background:linear-gradient(160deg,#aeaba2,#78746e 65%);}
-  .t4{background:linear-gradient(160deg,#c0bdb4,#8b877f 65%);}
-  .t5{background:linear-gradient(160deg,#a5a29a,#726e68 65%);}
-  .t6{background:linear-gradient(160deg,#b9b6ad,#807c75 65%);}
-  .t7{background:linear-gradient(160deg,#9d9a92,#6a6660 65%);}
+  .b1{background:linear-gradient(160deg,#c7c5bd,#8b867e 60%);}
+  .b2{background:linear-gradient(160deg,#aeaba2,#726e68 60%);}
   .bts-note{font-family:var(--mono); font-size:11px; color:var(--ink-dim); margin-top:20px; letter-spacing:0.03em;}
 
   .pf-sub-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:24px; margin-top:70px;}
@@ -328,7 +324,6 @@
     h2.section-title{font-size:clamp(26px,8vw,36px); padding-left:0;}
     .about-lead p{font-size:16.5px;}
 
-    .bts-grid{grid-template-columns:repeat(2,1fr);}
     .flow-step{min-height:auto; padding:24px 20px;}
     .flow-quote{margin-top:36px; font-size:clamp(19px,5.5vw,24px);}
 
@@ -395,14 +390,9 @@
     <div class="about-lead reveal">
       <p>Project i는 아이디어를 영상으로 만드는 팀입니다.<br>단순히 촬영하는 것이 아니라,<br>프로젝트의 목적을 이해하고 가장 적합한 방식으로 기획하고 제작합니다.<br>결과물보다 먼저 프로젝트를 이해하는 것.<br><strong>그것이 Project i가 일하는 방식입니다.</strong></p>
     </div>
-    <div class="bts-grid reveal">
-      <div class="bts-tile t1"><span>촬영 현장</span></div>
-      <div class="bts-tile t2"><span>감독 &amp; 디렉팅</span></div>
-      <div class="bts-tile t3"><span>카메라 세팅</span></div>
-      <div class="bts-tile t4"><span>조명 세팅</span></div>
-      <div class="bts-tile t5"><span>모니터링</span></div>
-      <div class="bts-tile t6"><span>드론 촬영</span></div>
-      <div class="bts-tile t7"><span>회의 및 기획</span></div>
+    <div class="bts-duo reveal">
+      <div class="bts-tile" style="background-image:url('images/about/1.jpg'); background-position:30% center;"><span>촬영 현장</span></div>
+      <div class="bts-tile" style="background-image:url('images/about/2.jpg'); background-position:center;"><span>스튜디오 세팅</span></div>
     </div>
     <p class="bts-note reveal">※ 실제 촬영 현장 및 작업 과정 사진으로 교체 예정입니다.</p>
   </div>
