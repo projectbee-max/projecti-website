@@ -53,34 +53,70 @@
   .g9{background:linear-gradient(155deg,#98958c,#68655f 60%);}
 
   .tile{cursor:pointer;}
+  .cover-badge{position:absolute; top:16px; right:16px; z-index:2; font-family:var(--mono); font-size:10.5px; letter-spacing:0.04em; color:#f5f5f2; background:rgba(19,19,17,0.4); padding:5px 10px; border-radius:20px;}
 
-  /* ---------- lightbox ---------- */
-  .lightbox-overlay{
-    position:fixed; inset:0; z-index:500;
-    background:rgba(19,19,17,0.55);
+  /* ---------- layer 1: gallery grid overlay ---------- */
+  .gallery-overlay{
+    position:fixed; inset:0; z-index:400;
+    background:rgba(19,19,17,0.5);
     backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
     display:flex; align-items:center; justify-content:center;
-    opacity:0; pointer-events:none; transition:opacity .35s ease;
+    opacity:0; pointer-events:none; transition:opacity .3s ease;
     padding:40px;
   }
-  .lightbox-overlay.open{opacity:1; pointer-events:all;}
-  .lightbox-box{
-    width:min(760px,90vw); max-height:86vh; aspect-ratio:4/5; position:relative;
-    border-radius:3px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.35);
-    transform:scale(0.96); transition:transform .35s ease;
+  .gallery-overlay.open{opacity:1; pointer-events:all;}
+  .gallery-box{
+    width:min(980px,92vw); max-height:86vh; overflow-y:auto;
+    background:var(--bg); border-radius:4px; padding:40px;
+    box-shadow:0 40px 100px rgba(0,0,0,0.35);
+    transform:scale(0.97); transition:transform .3s ease;
   }
-  .lightbox-overlay.open .lightbox-box{transform:scale(1);}
-  .lightbox-box::after{content:''; position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.55), transparent 55%);}
-  .lightbox-caption{position:absolute; left:26px; bottom:24px; z-index:2;}
-  .lightbox-caption .lcat{font-family:var(--mono); font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:#e8e6df; display:block; margin-bottom:8px; font-weight:600;}
-  .lightbox-caption .ltitle{font-family:var(--display); font-weight:800; font-size:24px; color:#f7f6f2;}
-  .lightbox-close{
-    position:absolute; top:28px; right:28px; z-index:501;
+  .gallery-overlay.open .gallery-box{transform:scale(1);}
+  .gallery-head{display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:26px;}
+  .gallery-head .gcat{font-family:var(--mono); font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-dim); display:block; margin-bottom:8px; font-weight:600;}
+  .gallery-head .gtitle{font-family:var(--display); font-weight:800; font-size:26px;}
+  .gallery-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
+  @media (max-width:640px){.gallery-grid{grid-template-columns:repeat(2,1fr);}}
+  .gallery-thumb{aspect-ratio:4/5; border-radius:2px; cursor:pointer; transition:opacity .2s, transform .2s;}
+  .gallery-thumb:hover{opacity:0.85; transform:scale(0.98);}
+
+  /* ---------- layer 2: single photo overlay (stacks above gallery) ---------- */
+  .single-overlay{
+    position:fixed; inset:0; z-index:600;
+    background:rgba(19,19,17,0.55);
+    backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none; transition:opacity .3s ease;
+    padding:40px;
+  }
+  .single-overlay.open{opacity:1; pointer-events:all;}
+  .single-box{
+    width:min(760px,90vw); max-height:86vh; aspect-ratio:4/5; position:relative;
+    border-radius:3px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.4);
+    transform:scale(0.96); transition:transform .3s ease;
+  }
+  .single-overlay.open .single-box{transform:scale(1);}
+  .single-box::after{content:''; position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.55), transparent 55%);}
+  .single-caption{position:absolute; left:26px; bottom:24px; z-index:2;}
+  .single-caption .lcat{font-family:var(--mono); font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:#e8e6df; display:block; margin-bottom:8px; font-weight:600;}
+  .single-caption .ltitle{font-family:var(--display); font-weight:800; font-size:24px; color:#f7f6f2;}
+  .single-counter{position:absolute; right:26px; bottom:24px; z-index:2; font-family:var(--mono); font-size:11.5px; color:#e8e6df; font-weight:600;}
+
+  .overlay-close{
+    position:absolute; top:28px; right:28px; z-index:601;
     width:44px; height:44px; border-radius:50%; border:1.5px solid rgba(19,19,17,0.3);
     background:var(--bg); color:var(--ink); font-family:var(--body); font-size:18px; cursor:pointer;
     display:flex; align-items:center; justify-content:center; transition:background .2s, color .2s;
   }
-  .lightbox-close:hover{background:var(--ink); color:var(--bg);}
+  .overlay-close:hover{background:var(--ink); color:var(--bg);}
+  .nav-arrow{
+    position:absolute; top:50%; transform:translateY(-50%); z-index:601;
+    width:46px; height:46px; border-radius:50%; border:1.5px solid rgba(245,245,242,0.5);
+    background:rgba(19,19,17,0.35); color:#f5f5f2; font-size:18px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; transition:background .2s;
+  }
+  .nav-arrow:hover{background:rgba(19,19,17,0.6);}
+  .nav-prev{left:14px;} .nav-next{right:14px;}
 
   footer{border-top:1px solid var(--line); padding:30px 0; font-family:var(--mono); font-size:11px; color:var(--ink-dim); text-align:center;}
 
@@ -115,46 +151,115 @@
 </div>
 
 <div class="grid">
-  <div class="tile g1" data-bg="g1" data-cat="Brand" data-title="브랜드 캠페인 촬영" onclick="openLightbox(this)"><div class="info"><span class="cat">Brand</span><span class="ttl">브랜드 캠페인 촬영</span></div></div>
-  <div class="tile g2" data-bg="g2" data-cat="Product" data-title="제품 카탈로그 촬영" onclick="openLightbox(this)"><div class="info"><span class="cat">Product</span><span class="ttl">제품 카탈로그 촬영</span></div></div>
-  <div class="tile g3" data-bg="g3" data-cat="Profile" data-title="대표 프로필 촬영" onclick="openLightbox(this)"><div class="info"><span class="cat">Profile</span><span class="ttl">대표 프로필 촬영</span></div></div>
-  <div class="tile g4" data-bg="g4" data-cat="Lifestyle" data-title="라이프스타일 화보" onclick="openLightbox(this)"><div class="info"><span class="cat">Lifestyle</span><span class="ttl">라이프스타일 화보</span></div></div>
-  <div class="tile g5" data-bg="g5" data-cat="Event" data-title="브랜드 행사 기록" onclick="openLightbox(this)"><div class="info"><span class="cat">Event</span><span class="ttl">브랜드 행사 기록</span></div></div>
-  <div class="tile g6" data-bg="g6" data-cat="Brand" data-title="쇼룸 오프닝 촬영" onclick="openLightbox(this)"><div class="info"><span class="cat">Brand</span><span class="ttl">쇼룸 오프닝 촬영</span></div></div>
-  <div class="tile g7" data-bg="g7" data-cat="Product" data-title="신제품 런칭 비주얼" onclick="openLightbox(this)"><div class="info"><span class="cat">Product</span><span class="ttl">신제품 런칭 비주얼</span></div></div>
-  <div class="tile g8" data-bg="g8" data-cat="Profile" data-title="아티스트 포트레이트" onclick="openLightbox(this)"><div class="info"><span class="cat">Profile</span><span class="ttl">아티스트 포트레이트</span></div></div>
-  <div class="tile g9" data-bg="g9" data-cat="Lifestyle" data-title="공간 &amp; 라이프 화보" onclick="openLightbox(this)"><div class="info"><span class="cat">Lifestyle</span><span class="ttl">공간 &amp; 라이프 화보</span></div></div>
+  <div class="tile g1" onclick="openGallery('brand')"><span class="cover-badge">6 Photos</span><div class="info"><span class="cat">Brand</span><span class="ttl">브랜드 캠페인 촬영</span></div></div>
+  <div class="tile g2" onclick="openGallery('product')"><span class="cover-badge">5 Photos</span><div class="info"><span class="cat">Product</span><span class="ttl">제품 카탈로그 촬영</span></div></div>
+  <div class="tile g3" onclick="openGallery('profile')"><span class="cover-badge">4 Photos</span><div class="info"><span class="cat">Profile</span><span class="ttl">대표 프로필 촬영</span></div></div>
+  <div class="tile g4" onclick="openGallery('lifestyle')"><span class="cover-badge">7 Photos</span><div class="info"><span class="cat">Lifestyle</span><span class="ttl">라이프스타일 화보</span></div></div>
+  <div class="tile g5" onclick="openGallery('event')"><span class="cover-badge">5 Photos</span><div class="info"><span class="cat">Event</span><span class="ttl">브랜드 행사 기록</span></div></div>
+  <div class="tile g6" onclick="openGallery('showroom')"><span class="cover-badge">6 Photos</span><div class="info"><span class="cat">Brand</span><span class="ttl">쇼룸 오프닝 촬영</span></div></div>
 </div>
 
-<div class="lightbox-overlay" id="lightbox" onclick="if(event.target===this)closeLightbox()">
-  <button class="lightbox-close" onclick="closeLightbox()" aria-label="닫기">✕</button>
-  <div class="lightbox-box" id="lightboxBox">
-    <div class="lightbox-caption">
-      <span class="lcat" id="lightboxCat"></span>
-      <span class="ltitle" id="lightboxTitle"></span>
+<div class="gallery-overlay" id="galleryOverlay" onclick="if(event.target===this)closeGallery()">
+  <button class="overlay-close" onclick="closeGallery()" aria-label="닫기">✕</button>
+  <div class="gallery-box">
+    <div class="gallery-head">
+      <div><span class="gcat" id="galleryCat"></span><span class="gtitle" id="galleryTitle"></span></div>
     </div>
+    <div class="gallery-grid" id="galleryGrid"></div>
+  </div>
+</div>
+
+<div class="single-overlay" id="singleOverlay" onclick="if(event.target===this)closeSingle()">
+  <button class="overlay-close" onclick="closeSingle()" aria-label="닫기">✕</button>
+  <button class="nav-arrow nav-prev" onclick="prevImg(event)" aria-label="이전 사진">‹</button>
+  <button class="nav-arrow nav-next" onclick="nextImg(event)" aria-label="다음 사진">›</button>
+  <div class="single-box" id="singleBox">
+    <div class="single-caption">
+      <span class="lcat" id="singleCat"></span>
+      <span class="ltitle" id="singleTitle"></span>
+    </div>
+    <span class="single-counter" id="singleCounter"></span>
   </div>
 </div>
 
 <script>
-  function openLightbox(el){
-    var box = document.getElementById('lightboxBox');
-    box.className = 'lightbox-box ' + el.getAttribute('data-bg');
-    document.getElementById('lightboxCat').textContent = el.getAttribute('data-cat');
-    document.getElementById('lightboxTitle').textContent = el.getAttribute('data-title');
-    document.getElementById('lightbox').classList.add('open');
+  var GRADS = ['g1','g2','g3','g4','g5','g6','g7','g8','g9'];
+  var galleries = {
+    brand:     {cat:'Brand',     title:'브랜드 캠페인 촬영', count:6, offset:0},
+    product:   {cat:'Product',   title:'제품 카탈로그 촬영', count:5, offset:2},
+    profile:   {cat:'Profile',   title:'대표 프로필 촬영',   count:4, offset:4},
+    lifestyle: {cat:'Lifestyle', title:'라이프스타일 화보',   count:7, offset:1},
+    event:     {cat:'Event',     title:'브랜드 행사 기록',   count:5, offset:3},
+    showroom:  {cat:'Brand',     title:'쇼룸 오프닝 촬영',   count:6, offset:5}
+  };
+  var currentImages = [];
+  var currentCat = '', currentTitle = '';
+  var currentIndex = 0;
+
+  function buildImages(offset, count){
+    var arr = [];
+    for(var i=0; i<count; i++){ arr.push(GRADS[(offset+i) % GRADS.length]); }
+    return arr;
+  }
+
+  // layer 1: cover click -> grid of photos, blurred background
+  function openGallery(key){
+    var g = galleries[key];
+    currentImages = buildImages(g.offset, g.count);
+    currentCat = g.cat; currentTitle = g.title;
+    document.getElementById('galleryCat').textContent = g.cat;
+    document.getElementById('galleryTitle').textContent = g.title;
+
+    var grid = document.getElementById('galleryGrid');
+    grid.innerHTML = '';
+    currentImages.forEach(function(cls, i){
+      var d = document.createElement('div');
+      d.className = 'gallery-thumb ' + cls;
+      d.onclick = function(){ openSingle(i); };
+      grid.appendChild(d);
+    });
+
+    document.getElementById('galleryOverlay').classList.add('open');
     document.body.style.overflow = 'hidden';
   }
-  function closeLightbox(){
-    document.getElementById('lightbox').classList.remove('open');
+  function closeGallery(){
+    document.getElementById('galleryOverlay').classList.remove('open');
+    closeSingle();
     document.body.style.overflow = '';
   }
+
+  // layer 2: photo click -> single enlarged photo, stacked on top, background still blurred
+  function openSingle(index){
+    currentIndex = index;
+    renderSingle();
+    document.getElementById('singleOverlay').classList.add('open');
+  }
+  function renderSingle(){
+    var box = document.getElementById('singleBox');
+    box.className = 'single-box ' + currentImages[currentIndex];
+    document.getElementById('singleCat').textContent = currentCat;
+    document.getElementById('singleTitle').textContent = currentTitle;
+    document.getElementById('singleCounter').textContent = (currentIndex+1) + ' / ' + currentImages.length;
+  }
+  function closeSingle(){
+    document.getElementById('singleOverlay').classList.remove('open');
+  }
+  function nextImg(e){ if(e) e.stopPropagation(); currentIndex = (currentIndex+1) % currentImages.length; renderSingle(); }
+  function prevImg(e){ if(e) e.stopPropagation(); currentIndex = (currentIndex-1+currentImages.length) % currentImages.length; renderSingle(); }
+
   document.addEventListener('keydown', function(e){
-    if(e.key === 'Escape') closeLightbox();
+    if(e.key === 'Escape'){
+      if(document.getElementById('singleOverlay').classList.contains('open')) closeSingle();
+      else closeGallery();
+    }
+    if(document.getElementById('singleOverlay').classList.contains('open')){
+      if(e.key === 'ArrowRight') nextImg();
+      if(e.key === 'ArrowLeft') prevImg();
+    }
   });
 </script>
 
-<footer>※ 실제 사진으로 교체 예정입니다 — © 2026 PROJECT i</footer>
+<footer>※ 대표 이미지 → 여러 장의 사진 → 클릭한 사진 확대 순서로 이어지는 구조입니다. 실제 사진으로 교체 예정입니다 — © 2026 PROJECT i</footer>
 
 </body>
 </html>
