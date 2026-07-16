@@ -25,7 +25,7 @@
   .back:hover{color:var(--ink);}
   .brand img{height:28px;}
 
-  .page-head{padding:70px 0 50px;}
+  .page-head{padding-top:70px; padding-bottom:50px;}
   .kicker{font-family:var(--mono); font-size:11.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-dim); display:block; margin-bottom:18px;}
   h1{font-family:var(--display); font-weight:800; font-size:clamp(32px,5vw,54px); line-height:1.05;}
   .page-note{margin-top:20px; font-family:var(--body); color:var(--ink-dim); font-size:15.5px; max-width:560px; line-height:1.8;}
@@ -36,7 +36,7 @@
   .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:3px; background:var(--line); padding-bottom:100px;}
   @media (max-width:860px){.grid{grid-template-columns:repeat(2,1fr);}}
   @media (max-width:560px){.grid{grid-template-columns:1fr;}}
-  .tile{aspect-ratio:4/5; position:relative; display:flex; align-items:flex-end; padding:20px;}
+  .tile{aspect-ratio:4/5; position:relative; display:flex; align-items:flex-end; padding:20px; background-size:cover; background-position:center 22%; background-color:#c9c6bd;}
   .tile::after{content:''; position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.62), transparent 55%);}
   .tile .info{position:relative; z-index:2;}
   .tile .cat{font-family:var(--mono); font-size:10px; letter-spacing:0.06em; text-transform:uppercase; color:#e8e6df; display:block; margin-bottom:6px;}
@@ -77,7 +77,7 @@
   .gallery-head .gtitle{font-family:var(--display); font-weight:800; font-size:26px;}
   .gallery-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
   @media (max-width:640px){.gallery-grid{grid-template-columns:repeat(2,1fr);}}
-  .gallery-thumb{aspect-ratio:4/5; border-radius:2px; cursor:pointer; transition:opacity .2s, transform .2s;}
+  .gallery-thumb{aspect-ratio:4/5; border-radius:2px; cursor:pointer; transition:opacity .2s, transform .2s; background-size:cover; background-position:center 22%; background-color:#c9c6bd;}
   .gallery-thumb:hover{opacity:0.85; transform:scale(0.98);}
 
   /* ---------- layer 2: single photo overlay (stacks above gallery) ---------- */
@@ -130,6 +130,29 @@
   .tile .cat{font-weight:600;}
   .tile .ttl{font-weight:800; font-size:19px;}
   footer{font-weight:500; font-size:12px;}
+
+  /* ---------- mobile refinements ---------- */
+  @media (max-width:640px){
+    header{padding:24px 0 16px;}
+    .brand img{height:22px;}
+    .page-head{padding-top:44px; padding-bottom:34px;}
+    h1{font-size:clamp(28px,9vw,40px);}
+    .page-note{font-size:15px;}
+    .filter-row{margin:28px 0 4px; padding-bottom:24px; gap:8px;}
+    .filter-row span{font-size:10px; padding:6px 12px;}
+    .grid{padding-bottom:60px;}
+    .tile .ttl{font-size:16px;}
+
+    .gallery-overlay, .single-overlay{padding:16px;}
+    .gallery-box{padding:24px 18px; max-height:88vh;}
+    .gallery-head .gtitle{font-size:20px;}
+    .gallery-grid{gap:6px;}
+    .single-box{max-height:70vh;}
+    .single-caption .ltitle{font-size:19px;}
+    .overlay-close{width:38px; height:38px; font-size:15px; top:16px; right:16px;}
+    .nav-arrow{width:38px; height:38px; font-size:16px;}
+    .nav-prev{left:6px;} .nav-next{right:6px;}
+  }
 </style>
 </head>
 <body>
@@ -144,19 +167,12 @@
 <div class="wrap page-head">
   <span class="kicker">Portfolio — Photography</span>
   <h1>사진으로 남긴<br>프로젝트들.</h1>
-  <p class="page-note">브랜드, 제품, 프로필, 라이프스타일, 행사 — Project i가 담아온 사진 작업을 모았습니다.</p>
-  <div class="filter-row">
-    <span>Brand</span><span>Product</span><span>Profile</span><span>Lifestyle</span><span>Event</span>
-  </div>
+  <p class="page-note">Snap, F1 Concept, Lifestyle, Profile — Project i가 담아온 사진 작업을 모았습니다.</p>
+  <div class="filter-row" id="filterRow"></div>
 </div>
 
-<div class="grid">
-  <div class="tile g1" onclick="openGallery('brand')"><span class="cover-badge">6 Photos</span><div class="info"><span class="cat">Brand</span><span class="ttl">브랜드 캠페인 촬영</span></div></div>
-  <div class="tile g2" onclick="openGallery('product')"><span class="cover-badge">5 Photos</span><div class="info"><span class="cat">Product</span><span class="ttl">제품 카탈로그 촬영</span></div></div>
-  <div class="tile g3" onclick="openGallery('profile')"><span class="cover-badge">4 Photos</span><div class="info"><span class="cat">Profile</span><span class="ttl">대표 프로필 촬영</span></div></div>
-  <div class="tile g4" onclick="openGallery('lifestyle')"><span class="cover-badge">7 Photos</span><div class="info"><span class="cat">Lifestyle</span><span class="ttl">라이프스타일 화보</span></div></div>
-  <div class="tile g5" onclick="openGallery('event')"><span class="cover-badge">5 Photos</span><div class="info"><span class="cat">Event</span><span class="ttl">브랜드 행사 기록</span></div></div>
-  <div class="tile g6" onclick="openGallery('showroom')"><span class="cover-badge">6 Photos</span><div class="info"><span class="cat">Brand</span><span class="ttl">쇼룸 오프닝 촬영</span></div></div>
+<div class="wrap">
+  <div class="grid" id="portfolioGrid"></div>
 </div>
 
 <div class="gallery-overlay" id="galleryOverlay" onclick="if(event.target===this)closeGallery()">
@@ -183,38 +199,120 @@
 </div>
 
 <script>
-  var GRADS = ['g1','g2','g3','g4','g5','g6','g7','g8','g9'];
-  var galleries = {
-    brand:     {cat:'Brand',     title:'브랜드 캠페인 촬영', count:6, offset:0},
-    product:   {cat:'Product',   title:'제품 카탈로그 촬영', count:5, offset:2},
-    profile:   {cat:'Profile',   title:'대표 프로필 촬영',   count:4, offset:4},
-    lifestyle: {cat:'Lifestyle', title:'라이프스타일 화보',   count:7, offset:1},
-    event:     {cat:'Event',     title:'브랜드 행사 기록',   count:5, offset:3},
-    showroom:  {cat:'Brand',     title:'쇼룸 오프닝 촬영',   count:6, offset:5}
-  };
-  var currentImages = [];
-  var currentCat = '', currentTitle = '';
-  var currentIndex = 0;
+  /* =========================================================
+     새 프로젝트를 추가하려면 아래 목록에 폴더명 한 줄만 추가하세요.
+     예) '7. snap_서효권' 폴더를 만들고 사진을 1.jpg, 2.jpg... 순서로 넣은 뒤,
+         아래 배열 맨 끝에 '7. snap_서효권' 한 줄만 추가하면 끝입니다.
+     - 목록에 적힌 순서 = 사이트에 보여지는 순서
+     - 폴더 안 사진 개수 = 자동으로 감지 (1.jpg부터 순서대로 있는 만큼)
+     - 사진 1번이 항상 커버(대표 이미지)가 됩니다
+     - 폴더명 형식: "번호. 카테고리_이름" (예: "7. snap_서효권")
+     ========================================================= */
+  var PROJECT_FOLDERS = [
+    '1. snap_김가영',
+    '2. f1 concept_임채원',
+    '3. lifestyle_하방',
+    '4. profile_문우주',
+    '5. profile_김하윤',
+    '6. snap_채다빈'
+  ];
+  var PHOTO_BASE = 'images/photo/';
+  var MAX_PHOTOS_PER_FOLDER = 40;
 
-  function buildImages(offset, count){
-    var arr = [];
-    for(var i=0; i<count; i++){ arr.push(GRADS[(offset+i) % GRADS.length]); }
-    return arr;
+  /* 특정 사진만 크롭 기준점을 다르게 주고 싶을 때 여기에 한 줄씩 추가하세요.
+     기본값은 'center 22%' (얼굴이 잘리지 않도록 살짝 위쪽 기준)이고,
+     특정 사진이 여전히 이상하게 잘리면 경로를 적고 원하는 위치를 지정하면 됩니다.
+     값은 'center top' / 'center 10%' / '50% 15%' 처럼 CSS background-position 형식입니다. */
+  var CROP_OVERRIDES = {
+    // 'images/photo/2. f1 concept_임채원/1.jpg': 'center 10%',
+  };
+  function cropFor(path){
+    return CROP_OVERRIDES[path] || 'center 22%';
   }
+
+  function parseFolder(folder){
+    var rest = folder.replace(/^\s*\d+\.\s*/, '');
+    var parts = rest.split('_');
+    var catRaw = parts[0].trim();
+    var name = parts.length > 1 ? parts.slice(1).join('_').trim() : '';
+    var cat = catRaw.replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+    return {cat: cat, title: name || cat};
+  }
+
+  function photoPath(folder, n){
+    return PHOTO_BASE + encodeURIComponent(folder) + '/' + n + '.jpg';
+  }
+
+  function countPhotos(folder, cb){
+    var found = [];
+    function tryNext(n){
+      if(n > MAX_PHOTOS_PER_FOLDER){ cb(found); return; }
+      var img = new Image();
+      img.onload = function(){ found.push(photoPath(folder, n)); tryNext(n+1); };
+      img.onerror = function(){ cb(found); };
+      img.src = photoPath(folder, n);
+    }
+    tryNext(1);
+  }
+
+  var galleries = {};
+  var currentImages = [], currentCat = '', currentTitle = '', currentIndex = 0;
+
+  function renderFilters(cats){
+    var row = document.getElementById('filterRow');
+    row.innerHTML = '';
+    cats.forEach(function(c){
+      var span = document.createElement('span');
+      span.textContent = c;
+      row.appendChild(span);
+    });
+  }
+
+  function renderGrid(){
+    var grid = document.getElementById('portfolioGrid');
+    grid.innerHTML = '';
+    var seenCats = [];
+
+    PROJECT_FOLDERS.forEach(function(folder, idx){
+      var meta = parseFolder(folder);
+      if(seenCats.indexOf(meta.cat) === -1) seenCats.push(meta.cat);
+      var key = 'g' + idx;
+
+      var tile = document.createElement('div');
+      tile.className = 'tile';
+      tile.innerHTML = '<span class="cover-badge" id="badge-'+key+'">···</span><div class="info"><span class="cat">'+meta.cat+'</span><span class="ttl">'+meta.title+'</span></div>';
+      tile.onclick = function(){ if(galleries[key]) openGallery(key); };
+      grid.appendChild(tile);
+
+      countPhotos(folder, function(images){
+        if(!images.length){ tile.style.display = 'none'; return; }
+        galleries[key] = {cat:meta.cat, title:meta.title, images:images};
+        tile.style.backgroundImage = "url('" + images[0] + "')"; // 1번 사진 = 커버
+        tile.style.backgroundPosition = cropFor(images[0]);
+        var badge = document.getElementById('badge-'+key);
+        if(badge) badge.textContent = images.length + ' Photos';
+      });
+    });
+
+    renderFilters(seenCats);
+  }
+  renderGrid();
 
   // layer 1: cover click -> grid of photos, blurred background
   function openGallery(key){
     var g = galleries[key];
-    currentImages = buildImages(g.offset, g.count);
+    currentImages = g.images;
     currentCat = g.cat; currentTitle = g.title;
     document.getElementById('galleryCat').textContent = g.cat;
     document.getElementById('galleryTitle').textContent = g.title;
 
     var grid = document.getElementById('galleryGrid');
     grid.innerHTML = '';
-    currentImages.forEach(function(cls, i){
+    currentImages.forEach(function(src, i){
       var d = document.createElement('div');
-      d.className = 'gallery-thumb ' + cls;
+      d.className = 'gallery-thumb';
+      d.style.backgroundImage = "url('" + src + "')";
+      d.style.backgroundPosition = cropFor(src);
       d.onclick = function(){ openSingle(i); };
       grid.appendChild(d);
     });
@@ -236,7 +334,9 @@
   }
   function renderSingle(){
     var box = document.getElementById('singleBox');
-    box.className = 'single-box ' + currentImages[currentIndex];
+    box.style.backgroundImage = "url('" + currentImages[currentIndex] + "')";
+    box.style.backgroundSize = 'cover';
+    box.style.backgroundPosition = cropFor(currentImages[currentIndex]);
     document.getElementById('singleCat').textContent = currentCat;
     document.getElementById('singleTitle').textContent = currentTitle;
     document.getElementById('singleCounter').textContent = (currentIndex+1) + ' / ' + currentImages.length;
@@ -258,15 +358,15 @@
     }
   });
 
-  // 홈페이지에서 ?p=brand 같은 형태로 들어오면 해당 프로젝트를 바로 열어줍니다.
+  // 홈페이지에서 ?p=g0 같은 형태로 들어오면 해당 프로젝트를 바로 열어줍니다.
   (function(){
     var params = new URLSearchParams(window.location.search);
     var p = params.get('p');
-    if(p && galleries[p]) openGallery(p);
+    if(p) setTimeout(function(){ if(galleries[p]) openGallery(p); }, 400);
   })();
 </script>
 
-<footer>※ 대표 이미지 → 여러 장의 사진 → 클릭한 사진 확대 순서로 이어지는 구조입니다. 실제 사진으로 교체 예정입니다 — © 2026 PROJECT i</footer>
+<footer>※ images/photo/ 폴더 구조에 맞춰 사진 개수·순서가 자동 반영됩니다 — © 2026 PROJECT i</footer>
 
 </body>
 </html>
