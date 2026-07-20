@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROJECT BEE — Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,600;0,700;0,800;0,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f7f6f2; --bg-alt:#eeede7; --panel:#ffffff; --ink:#131311; --ink-dim:#6f6d67;
+    --line: rgba(19,19,17,0.12); --line-strong: rgba(19,19,17,0.3);
+    --display:'Archivo', sans-serif; --body:'Inter', sans-serif; --mono:'IBM Plex Mono', monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg); color:var(--ink); font-family:var(--body); -webkit-font-smoothing:antialiased;}
+  a{color:inherit; text-decoration:none;}
+  button{font-family:inherit;}
+
+  .topbar{height:60px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; padding:0 22px; position:sticky; top:0; background:var(--bg); z-index:50;}
+  .wordmark{display:flex; align-items:center; gap:10px;}
+  .wordmark img{height:20px; width:auto;}
+  .wordmark b{font-family:var(--display); font-weight:800; font-size:15px;}
+  .back{font-family:var(--mono); font-size:11.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-dim); transition:color .2s;}
+  .back:hover{color:var(--ink);}
+
+  .layout{display:grid; grid-template-columns:220px 1fr; min-height:calc(100svh - 60px);}
+  @media (max-width:860px){.layout{grid-template-columns:1fr;}}
+  .sidebar{border-right:1px solid var(--line); padding:26px 16px;}
+  @media (max-width:860px){.sidebar{border-right:none; border-bottom:1px solid var(--line);}}
+  .side-group{margin-bottom:30px;}
+  .side-label{font-family:var(--mono); font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-dim); padding:0 10px; margin-bottom:10px; display:block;}
+  .side-link{display:block; padding:9px 10px; border-radius:4px; font-size:13.5px; font-weight:500; color:var(--ink-dim); transition:background .15s, color .15s; margin-bottom:2px;}
+  .side-link:hover{background:var(--bg-alt); color:var(--ink);}
+  .side-link.active{background:var(--ink); color:var(--bg);}
+
+  main{padding:36px 40px 80px;}
+  @media (max-width:640px){main{padding:28px 20px 60px;}}
+  .head-row{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+  .kicker{font-family:var(--mono); font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-dim); display:block; margin-bottom:8px;}
+  h1{font-family:var(--display); font-weight:800; font-size:clamp(24px,4vw,30px);}
+  .add-btn{
+    font-family:var(--mono); font-size:11.5px; letter-spacing:0.05em; text-transform:uppercase;
+    background:var(--ink); color:var(--bg); border:none; padding:11px 20px; border-radius:1px; cursor:pointer; transition:opacity .2s;
+  }
+  .add-btn:hover{opacity:0.85;}
+  .view-tag{font-family:var(--mono); font-size:10.5px; color:var(--ink-dim); margin-top:10px;}
+
+  .data-table{margin-top:28px; border:1px solid var(--line); background:var(--panel);}
+  .data-row{display:grid; gap:12px; padding:14px 20px; border-bottom:1px solid var(--line); align-items:center; font-size:13.5px;}
+  .data-row:last-child{border-bottom:none;}
+  .data-row.head{background:var(--bg-alt); font-family:var(--mono); font-size:10.5px; letter-spacing:0.04em; text-transform:uppercase; color:var(--ink-dim);}
+  .data-row .cell{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .data-row .cell.name{font-weight:600;}
+  .data-row .del{background:none; border:none; color:#b3432f; font-family:var(--mono); font-size:11px; cursor:pointer; justify-self:end;}
+  .empty-note{padding:24px 20px; font-family:var(--mono); font-size:12px; color:var(--ink-dim);}
+
+  .add-form{margin-top:16px; border:1px solid var(--line); background:var(--panel); padding:20px; display:none;}
+  .add-form.open{display:block;}
+  .add-form .grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media (max-width:600px){.add-form .grid{grid-template-columns:1fr;}}
+  .add-form label{display:block; font-family:var(--mono); font-size:10.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:8px;}
+  .add-form input{width:100%; border:none; border-bottom:1px solid var(--line-strong); background:transparent; padding:8px 2px; font-size:14px; outline:none;}
+  .add-form input:focus{border-color:var(--ink);}
+  .add-form .actions{margin-top:20px; display:flex; gap:10px;}
+  .add-form button{font-family:var(--mono); font-size:11.5px; letter-spacing:0.04em; text-transform:uppercase; padding:10px 18px; border-radius:1px; cursor:pointer;}
+  .add-form .save-btn{background:var(--ink); color:var(--bg); border:none;}
+  .add-form .cancel-btn{background:transparent; border:1px solid var(--line-strong); color:var(--ink);}
+
+  .file-upload-row{padding:16px 20px; border-top:1px solid var(--line); background:var(--bg-alt); display:flex; align-items:center; gap:12px;}
+  .file-actions{display:flex; gap:12px; font-family:var(--mono); font-size:11px; justify-self:end;}
+  .file-actions a{color:var(--ink-dim); border-bottom:1px solid var(--line-strong);}
+
+  .preview-overlay{
+    position:fixed; inset:0; z-index:600; background:rgba(19,19,17,0.6);
+    display:flex; align-items:center; justify-content:center; padding:30px;
+    opacity:0; pointer-events:none; transition:opacity .25s;
+  }
+  .preview-overlay.open{opacity:1; pointer-events:all;}
+  .preview-box{
+    width:min(800px,92vw); max-height:86vh; background:var(--panel); border-radius:4px; overflow:hidden;
+    display:flex; flex-direction:column; box-shadow:0 30px 80px rgba(0,0,0,0.35);
+  }
+  .preview-head{display:flex; justify-content:space-between; align-items:center; padding:14px 18px; border-bottom:1px solid var(--line); font-family:var(--mono); font-size:12px;}
+  .preview-head button{background:none; border:none; font-size:16px; cursor:pointer; color:var(--ink-dim);}
+  .preview-body{flex:1; overflow:auto; display:flex; align-items:center; justify-content:center; background:var(--bg-alt); min-height:300px;}
+  .preview-body img{max-width:100%; max-height:78vh; display:block;}
+  .preview-body iframe{width:100%; height:78vh; border:none;}
+  .preview-body p{font-family:var(--mono); font-size:12px; color:var(--ink-dim); padding:40px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wordmark"><img src="data:image/png;base64,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" alt="Project Bee"><b>PROJECT BEE</b></div>
+  <a href="dashboard.html" class="back">← 대시보드로</a>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="side-group">
+      <a href="#" class="side-link" id="linkHome">홈</a>
+    </div>
+    <div class="side-group">
+      <span class="side-label">Project Bee</span>
+      <a href="#" class="side-link" id="linkTeamI">Project i</a>
+      <a href="#" class="side-link" id="linkTeamDrone">Project Bee</a>
+    </div>
+    <div class="side-group">
+      <span class="side-label">Management</span>
+      <a href="#" class="side-link" data-type="projects" id="navProjects">프로젝트</a>
+      <a href="#" class="side-link" data-type="tasks" id="navTasks">업무</a>
+      <a href="#" class="side-link" data-type="schedule" id="navSchedule">일정</a>
+      <a href="#" class="side-link" data-type="files" id="navFiles">파일</a>
+      <a href="#" class="side-link" data-type="clients" id="navClients">클라이언트</a>
+      <a href="#" class="side-link" data-type="equipment" id="navEquipment">장비</a>
+      <a href="#" class="side-link" data-type="members" id="navMembers">구성원</a>
+    </div>
+  </aside>
+
+  <main>
+    <div class="head-row">
+      <div>
+        <span class="kicker" id="kicker">Management</span>
+        <h1 id="pageTitle">불러오는 중…</h1>
+      </div>
+      <button class="add-btn" id="addBtn" hidden>+ 추가</button>
+    </div>
+    <p class="view-tag" id="viewTag" hidden>보기 전용 — 추가/삭제 권한이 없는 계정입니다</p>
+
+    <div class="add-form" id="addForm">
+      <div class="grid" id="addFormGrid"></div>
+      <div class="actions">
+        <button class="save-btn" id="saveBtn">저장</button>
+        <button class="cancel-btn" id="cancelBtn" type="button">취소</button>
+      </div>
+    </div>
+
+    <div class="data-table" id="dataTable"></div>
+  </main>
+</div>
+
+<div class="preview-overlay" id="previewOverlay">
+  <div class="preview-box">
+    <div class="preview-head"><span id="previewName">파일 미리보기</span><button id="previewClose">✕</button></div>
+    <div class="preview-body" id="previewBody"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  var SUPABASE_URL = 'https://dzgavufyqmhklywyyljx.supabase.co';
+  var SUPABASE_ANON_KEY = 'sb_publishable_vNvhBnzqzrC6VFY_ygL_XA_g4tL-P4B';
+  var supabase = (SUPABASE_URL && SUPABASE_ANON_KEY)
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : null;
+
+  async function requireLogin(){
+    if(!supabase) return true;
+    var { data: { session } } = await supabase.auth.getSession();
+    if(!session){ window.location.href = 'login.html'; return false; }
+    return true;
+  }
+
+  /* =========================================================
+     타입별 설정 — Management 메뉴 6개를 하나의 템플릿으로 처리합니다.
+     새 관리 항목이 필요하면 이 객체에 한 덩어리만 추가하면 됩니다.
+     ========================================================= */
+  var TYPE_CONFIG = {
+    tasks: { label:'업무', table:'tasks', team_scoped:true,
+      columns:[{key:'title',label:'제목',w:'2fr'},{key:'assignee',label:'담당자',w:'1fr'},{key:'due_date',label:'마감일',w:'1fr'},{key:'status',label:'상태',w:'1fr'}] },
+    schedule: { label:'일정', table:'schedules', team_scoped:true,
+      columns:[{key:'title',label:'일정',w:'2fr'},{key:'date',label:'날짜',w:'1fr'},{key:'owner',label:'담당자',w:'1fr'}] },
+    clients: { label:'클라이언트', table:'clients', team_scoped:true,
+      columns:[{key:'name',label:'회사명',w:'1.5fr'},{key:'contact',label:'담당자',w:'1fr'},{key:'phone',label:'연락처',w:'1fr'},{key:'email',label:'이메일',w:'1.5fr'}] },
+    equipment: { label:'장비', table:'equipment', team_scoped:true,
+      columns:[{key:'name',label:'장비명',w:'1.5fr'},{key:'category',label:'분류',w:'1fr'},{key:'status',label:'상태',w:'1fr'},{key:'location',label:'보관 위치',w:'1fr'}] },
+    members: { label:'구성원', table:'members', team_scoped:false,
+      columns:[{key:'name',label:'이름',w:'1fr'},{key:'team',label:'소속팀',w:'1fr'},{key:'role',label:'역할',w:'1fr'},{key:'email',label:'이메일',w:'1.5fr'}] },
+    files: { label:'파일', table:null, isFileType:true, columns:[] },
+    projects: { label:'프로젝트', table:'projects', isProjectType:true, columns:[] }
+  };
+
+  var params = new URLSearchParams(window.location.search);
+  var type = TYPE_CONFIG[params.get('type')] ? params.get('type') : 'tasks';
+  var cfg = TYPE_CONFIG[type];
+  var team = params.get('team') === 'drone' ? 'drone' : 'i';
+  var canEdit = false;
+
+  document.getElementById('linkHome').href = 'dashboard.html?team=' + team;
+  document.getElementById('linkTeamI').href = 'management.html?type=' + type + '&team=i';
+  document.getElementById('linkTeamDrone').href = 'management.html?type=' + type + '&team=drone';
+  document.getElementById('linkTeamI').classList.toggle('active', team === 'i');
+  document.getElementById('linkTeamDrone').classList.toggle('active', team === 'drone');
+  ['projects','tasks','schedule','files','clients','equipment','members'].forEach(function(t){
+    var el = document.getElementById('nav' + t.charAt(0).toUpperCase() + t.slice(1));
+    if(el) el.href = (t === 'projects' ? 'management.html?type=projects' : 'management.html?type=' + t) + '&team=' + team;
+  });
+
+  document.querySelectorAll('.side-link[data-type]').forEach(function(el){
+    el.classList.toggle('active', el.getAttribute('data-type') === type);
+  });
+  document.getElementById('kicker').textContent = (team === 'drone' ? 'PROJECT BEE' : 'PROJECT i') + ' · Management / ' + cfg.label;
+  document.getElementById('pageTitle').textContent = cfg.label;
+
+  async function checkPermission(){
+    if(!supabase) return;
+    var { data: { session } } = await supabase.auth.getSession();
+    if(!session) return;
+    var { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single();
+    canEdit = !!(profile && (profile.role === 'admin' || profile.role === 'editor'));
+    document.getElementById('addBtn').hidden = !canEdit || cfg.isFileType;
+    document.getElementById('viewTag').hidden = canEdit;
+  }
+
+  /* ---------- 일반 테이블형 (업무/일정/클라이언트/장비/구성원) ---------- */
+  function renderTable(rows){
+    var wrap = document.getElementById('dataTable');
+    wrap.innerHTML = '';
+    var templateCols = cfg.columns.map(function(c){ return c.w; }).join(' ') + (canEdit ? ' 60px' : '');
+
+    var head = document.createElement('div');
+    head.className = 'data-row head';
+    head.style.gridTemplateColumns = templateCols;
+    head.innerHTML = cfg.columns.map(function(c){ return '<span>'+c.label+'</span>'; }).join('') + (canEdit ? '<span></span>' : '');
+    wrap.appendChild(head);
+
+    if(!rows.length){
+      var empty = document.createElement('div');
+      empty.className = 'empty-note';
+      empty.textContent = '등록된 항목이 없습니다.';
+      wrap.appendChild(empty);
+      return;
+    }
+
+    rows.forEach(function(r){
+      var row = document.createElement('div');
+      row.className = 'data-row';
+      row.style.gridTemplateColumns = templateCols;
+      row.innerHTML = cfg.columns.map(function(c,i){
+        return '<span class="cell'+(i===0?' name':'')+'">'+(r[c.key] || '–')+'</span>';
+      }).join('') + (canEdit ? '<button class="del" data-id="'+r.id+'">삭제</button>' : '');
+      wrap.appendChild(row);
+    });
+
+    if(canEdit){
+      wrap.querySelectorAll('.del').forEach(function(btn){
+        btn.addEventListener('click', async function(){
+          if(!confirm('삭제할까요?')) return;
+          await supabase.from(cfg.table).delete().eq('id', this.getAttribute('data-id'));
+          loadRows();
+        });
+      });
+    }
+  }
+
+  async function loadRows(){
+    if(!supabase){
+      renderTable([]);
+      return;
+    }
+    var query = supabase.from(cfg.table).select('*').order('created_at', { ascending:false });
+    if(cfg.team_scoped) query = query.eq('team', team);
+    var { data, error } = await query;
+    if(error){ renderTable([]); return; }
+    renderTable(data || []);
+  }
+
+  /* ---------- 프로젝트 (전체 목록, 완료 포함) ---------- */
+  async function renderProjectType(){
+    var wrap = document.getElementById('dataTable');
+    wrap.innerHTML = '';
+    if(!supabase){
+      wrap.innerHTML = '<div class="empty-note">서버 연결 후 프로젝트 목록이 표시됩니다.</div>';
+      return;
+    }
+    var { data, error } = await supabase.from('projects').select('*').eq('team', team).order('created_at', { ascending:false });
+    if(error || !data || !data.length){
+      wrap.innerHTML = '<div class="empty-note">등록된 프로젝트가 없습니다. 아래 "+ 추가"로 새로 만들어보세요.</div>';
+      return;
+    }
+    var head = document.createElement('div');
+    head.className = 'data-row head';
+    head.style.gridTemplateColumns = canEdit ? '2fr 1fr 1fr 1fr 1fr 60px' : '2fr 1fr 1fr 1fr 1fr';
+    head.innerHTML = '<span>프로젝트</span><span>클라이언트</span><span>담당자</span><span>단계</span><span>상태</span>' + (canEdit ? '<span></span>' : '');
+    wrap.appendChild(head);
+
+    data.forEach(function(p){
+      var row = document.createElement('div');
+      row.className = 'data-row';
+      row.style.gridTemplateColumns = canEdit ? '2fr 1fr 1fr 1fr 1fr 60px' : '2fr 1fr 1fr 1fr 1fr';
+      var cells =
+        '<span class="cell name" style="cursor:pointer;">' + p.name + '</span>' +
+        '<span class="cell">' + (p.client||'–') + '</span>' +
+        '<span class="cell">' + (p.owner||'–') + '</span>' +
+        '<span class="cell">' + (p.stage||'–') + '</span>' +
+        '<span class="cell">' + (p.status === 'completed' ? '완료' : '진행 중') + '</span>';
+      if(canEdit) cells += '<button class="del" data-id="'+p.id+'">삭제</button>';
+      row.innerHTML = cells;
+      row.querySelector('.cell.name').addEventListener('click', function(){
+        window.location.href = 'project-detail.html?team=' + p.team + '&id=' + p.id + '&name=' + encodeURIComponent(p.name);
+      });
+      wrap.appendChild(row);
+    });
+    if(canEdit){
+      wrap.querySelectorAll('.del').forEach(function(btn){
+        btn.addEventListener('click', async function(e){
+          e.stopPropagation();
+          if(!confirm('이 프로젝트를 삭제할까요? 되돌릴 수 없습니다.')) return;
+          await supabase.from('projects').delete().eq('id', this.getAttribute('data-id'));
+          renderProjectType();
+        });
+      });
+    }
+  }
+
+  function buildProjectAddForm(){
+    var grid = document.getElementById('addFormGrid');
+    grid.innerHTML =
+      '<div><label>프로젝트명</label><input data-key="name"></div>' +
+      '<div><label>소속 팀</label><select data-key="team"><option value="i">Project i</option><option value="drone">Project Bee</option></select></div>' +
+      '<div><label>클라이언트</label><input data-key="client"></div>' +
+      '<div><label>담당자</label><input data-key="owner"></div>';
+  }
+
+  document.getElementById('addBtn').addEventListener('click', function(){
+    document.getElementById('addForm').classList.add('open');
+  });
+  document.getElementById('cancelBtn').addEventListener('click', function(){
+    document.getElementById('addForm').classList.remove('open');
+  });
+  document.getElementById('saveBtn').addEventListener('click', async function(){
+    var payload = {};
+    document.querySelectorAll('#addFormGrid input, #addFormGrid select').forEach(function(inp){
+      payload[inp.getAttribute('data-key')] = inp.value;
+    });
+    if(cfg.isProjectType){
+      payload.stage = '기획';
+      payload.status = 'active';
+    } else if(cfg.team_scoped){
+      payload.team = team;
+    }
+    if(supabase){
+      var { error } = await supabase.from(cfg.table).insert(payload);
+      if(error){ alert('저장 실패: ' + error.message); return; }
+    }
+    document.getElementById('addForm').classList.remove('open');
+    document.querySelectorAll('#addFormGrid input').forEach(function(inp){ inp.value = ''; });
+    if(cfg.isProjectType) renderProjectType(); else loadRows();
+  });
+
+  /* ---------- 파일형 (회사 공용 파일함) ---------- */
+  var COMPANY_BUCKET = 'company-files';
+
+  var IMAGE_EXT = ['jpg','jpeg','png','gif','webp'];
+  async function openPreview(name, bucket, folder){
+    var ext = (name.split('.').pop() || '').toLowerCase();
+    var path = folder + '/' + name;
+    var { data: signed } = await supabase.storage.from(bucket).createSignedUrl(path, 120);
+    var body = document.getElementById('previewBody');
+    document.getElementById('previewName').textContent = name;
+    if(!signed || !signed.signedUrl){
+      body.innerHTML = '<p>미리보기를 불러올 수 없습니다.</p>';
+    } else if(IMAGE_EXT.indexOf(ext) !== -1){
+      body.innerHTML = '<img src="'+signed.signedUrl+'">';
+    } else if(ext === 'pdf'){
+      body.innerHTML = '<iframe src="'+signed.signedUrl+'"></iframe>';
+    } else {
+      body.innerHTML = '<p>이 파일 형식은 미리보기를 지원하지 않아요. 다운로드해서 확인해주세요.</p>';
+    }
+    document.getElementById('previewOverlay').classList.add('open');
+  }
+  document.getElementById('previewClose').addEventListener('click', function(){
+    document.getElementById('previewOverlay').classList.remove('open');
+    document.getElementById('previewBody').innerHTML = '';
+  });
+  document.getElementById('previewOverlay').addEventListener('click', function(e){
+    if(e.target === this){ this.classList.remove('open'); document.getElementById('previewBody').innerHTML = ''; }
+  });
+  async function renderFileType(){
+    var wrap = document.getElementById('dataTable');
+    wrap.innerHTML = '';
+    if(!supabase){
+      wrap.innerHTML = '<div class="empty-note">서버 연결 후 파일 목록이 표시됩니다.</div>';
+      return;
+    }
+    var { data, error } = await supabase.storage.from(COMPANY_BUCKET).list('shared');
+    if(error || !data || !data.length){
+      wrap.innerHTML = '<div class="empty-note">업로드된 파일이 없습니다.</div>';
+    } else {
+      data.forEach(function(f){
+        var row = document.createElement('div');
+        row.className = 'data-row';
+        row.style.gridTemplateColumns = '1fr 140px';
+        var actions = '<span class="file-actions"><a href="#" class="dl-link" data-name="'+f.name+'">다운로드</a>' +
+          (canEdit ? '<button class="del" data-name="'+f.name+'">삭제</button>' : '') + '</span>';
+        row.innerHTML = '<span class="cell name" data-name="'+f.name+'" style="cursor:pointer;">'+f.name+'</span>' + actions;
+        wrap.appendChild(row);
+      });
+      wrap.querySelectorAll('.cell.name').forEach(function(el){
+        el.addEventListener('click', function(){ openPreview(this.getAttribute('data-name'), COMPANY_BUCKET, 'shared'); });
+      });
+      wrap.querySelectorAll('.dl-link').forEach(function(a){
+        a.addEventListener('click', async function(e){
+          e.preventDefault();
+          var fname = this.getAttribute('data-name');
+          var { data: signed } = await supabase.storage.from(COMPANY_BUCKET).createSignedUrl('shared/' + fname, 60);
+          if(signed && signed.signedUrl) window.open(signed.signedUrl, '_blank');
+          // 대시보드 "최근 파일"에 반영되도록 열람 기록 저장
+          var { data: { session } } = await supabase.auth.getSession();
+          var { data: profile } = session ? await supabase.from('profiles').select('name, team').eq('id', session.user.id).single() : { data:null };
+          await supabase.from('file_activity').insert({
+            team: (profile && profile.team) || 'i',
+            file_name: fname,
+            opened_by: (profile && profile.name) || (session && session.user.email)
+          });
+        });
+      });
+      wrap.querySelectorAll('.del').forEach(function(btn){
+        btn.addEventListener('click', async function(){
+          if(!confirm('삭제할까요?')) return;
+          await supabase.storage.from(COMPANY_BUCKET).remove(['shared/' + this.getAttribute('data-name')]);
+          renderFileType();
+        });
+      });
+    }
+    if(canEdit){
+      var uploadRow = document.createElement('div');
+      uploadRow.className = 'file-upload-row';
+      uploadRow.innerHTML = '<input type="file" id="companyFileInput"><button class="add-btn" id="companyUploadBtn" style="padding:9px 16px;">업로드</button>';
+      wrap.appendChild(uploadRow);
+      document.getElementById('companyUploadBtn').addEventListener('click', async function(){
+        var input = document.getElementById('companyFileInput');
+        if(!input.files.length) return;
+        var file = input.files[0];
+        var { error } = await supabase.storage.from(COMPANY_BUCKET).upload('shared/' + file.name, file, { upsert:true });
+        if(error){ alert('업로드 실패: ' + error.message); return; }
+        renderFileType();
+      });
+    }
+  }
+
+  async function init(){
+    var ok = await requireLogin();
+    if(!ok) return;
+    await checkPermission();
+
+    if(cfg.isFileType){
+      renderFileType();
+    } else if(cfg.isProjectType){
+      buildProjectAddForm();
+      renderProjectType();
+    } else {
+      buildAddForm();
+      loadRows();
+    }
+  }
+
+  init();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROJECT BEE — 프로젝트 상세</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,600;0,700;0,800;0,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f7f6f2; --bg-alt:#eeede7; --panel:#ffffff; --ink:#131311; --ink-dim:#6f6d67;
+    --line: rgba(19,19,17,0.12); --line-strong: rgba(19,19,17,0.3);
+    --display:'Archivo', sans-serif; --body:'Inter', sans-serif; --mono:'IBM Plex Mono', monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg); color:var(--ink); font-family:var(--body); -webkit-font-smoothing:antialiased;}
+  a{color:inherit; text-decoration:none;}
+
+  .topbar{height:60px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; padding:0 22px; position:sticky; top:0; background:var(--bg); z-index:50;}
+  .wordmark{display:flex; align-items:center; gap:10px;}
+  .wordmark img{height:20px; width:auto;}
+  .wordmark b{font-family:var(--display); font-weight:800; font-size:15px;}
+  .back{font-family:var(--mono); font-size:11.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-dim); transition:color .2s;}
+  .back:hover{color:var(--ink);}
+
+  .layout{display:grid; grid-template-columns:220px 1fr; min-height:calc(100svh - 60px);}
+  @media (max-width:860px){.layout{grid-template-columns:1fr;}}
+  .sidebar{border-right:1px solid var(--line); padding:26px 16px;}
+  @media (max-width:860px){.sidebar{border-right:none; border-bottom:1px solid var(--line);}}
+  .side-group{margin-bottom:30px;}
+  .side-label{font-family:var(--mono); font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-dim); padding:0 10px; margin-bottom:10px; display:block;}
+  .side-link{display:block; padding:9px 10px; border-radius:4px; font-size:13.5px; font-weight:500; color:var(--ink-dim); transition:background .15s, color .15s; margin-bottom:2px;}
+  .side-link:hover{background:var(--bg-alt); color:var(--ink);}
+  .side-link.active{background:var(--ink); color:var(--bg);}
+  main{max-width:900px; margin:0; padding:40px 40px 100px;}
+  @media (max-width:640px){main{padding:28px 20px 60px;}}
+
+  .kicker{font-family:var(--mono); font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-dim); display:block; margin-bottom:10px;}
+  h1{font-family:var(--display); font-weight:800; font-size:clamp(24px,4vw,32px);}
+  .stage-now{
+    display:inline-flex; align-items:center; gap:6px; margin-top:16px;
+    font-family:var(--mono); font-size:11px; letter-spacing:0.04em; text-transform:uppercase;
+    border:1px solid var(--line-strong); padding:6px 14px; border-radius:20px; color:var(--ink-dim);
+  }
+  .stage-now .dot{width:6px; height:6px; border-radius:50%; background:#3a8f5c;}
+
+  .block{margin-top:44px; border:1px solid var(--line); background:var(--panel);}
+  .block-head{font-family:var(--display); font-weight:800; font-size:15px; padding:16px 20px; border-bottom:1px solid var(--line); background:var(--bg-alt);}
+  .kv-grid{display:grid; grid-template-columns:1fr 1fr;}
+  @media (max-width:600px){.kv-grid{grid-template-columns:1fr;}}
+  .kv{padding:16px 20px; border-bottom:1px solid var(--line); border-right:1px solid var(--line);}
+  .kv:nth-child(2n){border-right:none;}
+  .kv label{display:block; font-family:var(--mono); font-size:10.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:6px;}
+  .kv .val{font-size:14px; font-weight:500;}
+  .kv .val.empty{color:var(--ink-dim); font-weight:400;}
+
+  .item-list{padding:8px 0;}
+  .item-row{display:flex; align-items:center; justify-content:space-between; padding:12px 20px; border-bottom:1px solid var(--line); font-size:13.5px;}
+  .item-row:last-child{border-bottom:none;}
+  .item-row .item-status{font-family:var(--mono); font-size:10.5px; color:var(--ink-dim);}
+
+  .proto-banner{
+    margin-top:44px; padding:16px 18px; border:1px dashed var(--line-strong); border-radius:4px;
+    font-family:var(--mono); font-size:11.5px; color:var(--ink-dim); line-height:1.8;
+  }
+  .proto-banner b{color:var(--ink);}
+
+  .head-row{display:flex; align-items:flex-start; justify-content:space-between; gap:16px;}
+  .btn-group{display:flex; gap:10px;}
+  .danger-btn{border-color:#c25a45; color:#b3432f;}
+  .danger-btn:hover{background:#b3432f; color:#fff;}
+  .edit-btn{
+    font-family:var(--mono); font-size:11.5px; letter-spacing:0.05em; text-transform:uppercase;
+    border:1px solid var(--line-strong); padding:9px 18px; border-radius:1px; cursor:pointer; background:transparent; color:var(--ink);
+    transition:background .2s, color .2s; white-space:nowrap;
+  }
+  .edit-btn:hover{background:var(--ink); color:var(--bg);}
+  .edit-btn.save{background:var(--ink); color:var(--bg);}
+  .view-tag{font-family:var(--mono); font-size:10.5px; color:var(--ink-dim); margin-top:16px;}
+
+  .kv input, .kv select{
+    width:100%; font-family:var(--body); font-size:14px; font-weight:500; color:var(--ink);
+    border:none; border-bottom:1px solid var(--line-strong); background:transparent; padding:4px 0; outline:none;
+  }
+  .item-row input{
+    font-family:var(--mono); font-size:12px; text-align:right; border:none; border-bottom:1px solid var(--line-strong);
+    background:transparent; color:var(--ink); outline:none; width:140px;
+  }
+  .item-row input.label-input{
+    font-family:var(--body); font-size:13.5px; text-align:left; width:auto; flex:1; margin-right:12px;
+  }
+  .item-row{display:flex; align-items:center;}
+  .item-row .item-remove{background:none; border:none; color:#b3432f; font-family:var(--mono); font-size:11px; cursor:pointer; margin-left:10px;}
+  .add-item-row{padding:10px 20px; border-top:1px solid var(--line);}
+  .add-item-btn{background:none; border:1px dashed var(--line-strong); color:var(--ink-dim); font-family:var(--mono); font-size:11px; padding:8px 14px; border-radius:2px; cursor:pointer; width:100%; transition:color .2s, border-color .2s;}
+  .add-item-btn:hover{color:var(--ink); border-color:var(--ink);}
+  .stage-files{border-top:1px solid var(--line);}
+  .stage-files .item-list{padding:0;}
+
+  .files-block .item-list{padding:0;}
+  .file-row{display:flex; align-items:center; justify-content:space-between; padding:12px 20px; border-bottom:1px solid var(--line); font-size:13.5px;}
+  .file-row:last-child{border-bottom:none;}
+  .file-row .fname{display:flex; align-items:center; gap:10px;}
+  .file-icon{width:26px; height:26px; border:1px solid var(--line-strong); border-radius:4px; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:9px; color:var(--ink-dim); flex-shrink:0;}
+  .file-actions{display:flex; align-items:center; gap:14px; font-family:var(--mono); font-size:11px;}
+  .file-actions a{color:var(--ink-dim); border-bottom:1px solid var(--line-strong);}
+  .file-actions a:hover{color:var(--ink);}
+  .file-actions button{background:none; border:none; color:#b3432f; font-family:var(--mono); font-size:11px; cursor:pointer;}
+  .upload-row{padding:16px 20px; border-top:1px solid var(--line); background:var(--bg-alt);}
+  .upload-row input[type=file]{font-family:var(--body); font-size:12.5px;}
+  .upload-hint{font-family:var(--mono); font-size:11px; color:var(--ink-dim); margin-top:16px;}
+
+  .fname{cursor:pointer;}
+  .preview-overlay{
+    position:fixed; inset:0; z-index:600; background:rgba(19,19,17,0.6);
+    display:flex; align-items:center; justify-content:center; padding:30px;
+    opacity:0; pointer-events:none; transition:opacity .25s;
+  }
+  .preview-overlay.open{opacity:1; pointer-events:all;}
+  .preview-box{
+    width:min(800px,92vw); max-height:86vh; background:var(--panel); border-radius:4px; overflow:hidden;
+    display:flex; flex-direction:column; box-shadow:0 30px 80px rgba(0,0,0,0.35);
+  }
+  .preview-head{display:flex; justify-content:space-between; align-items:center; padding:14px 18px; border-bottom:1px solid var(--line); font-family:var(--mono); font-size:12px;}
+  .preview-head button{background:none; border:none; font-size:16px; cursor:pointer; color:var(--ink-dim);}
+  .preview-body{flex:1; overflow:auto; display:flex; align-items:center; justify-content:center; background:var(--bg-alt); min-height:300px;}
+  .preview-body img{max-width:100%; max-height:78vh; display:block;}
+  .preview-body iframe{width:100%; height:78vh; border:none;}
+  .preview-body p{font-family:var(--mono); font-size:12px; color:var(--ink-dim); padding:40px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wordmark"><img src="data:image/png;base64,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" alt="Project Bee"><b>PROJECT BEE</b></div>
+  <a href="dashboard.html" class="back" id="backLink">← 대시보드로</a>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="side-group">
+      <a href="#" class="side-link" id="linkHome">홈</a>
+    </div>
+    <div class="side-group">
+      <span class="side-label">Project Bee</span>
+      <a href="#" class="side-link" id="linkTeamI">Project i</a>
+      <a href="#" class="side-link" id="linkTeamDrone">Project Bee</a>
+    </div>
+    <div class="side-group">
+      <span class="side-label">Management</span>
+      <a href="#" class="side-link" id="navProjects">프로젝트</a>
+      <a href="#" class="side-link" id="navTasks">업무</a>
+      <a href="#" class="side-link" id="navSchedule">일정</a>
+      <a href="#" class="side-link" id="navFiles">파일</a>
+      <a href="#" class="side-link" id="navClients">클라이언트</a>
+      <a href="#" class="side-link" id="navEquipment">장비</a>
+      <a href="#" class="side-link" id="navMembers">구성원</a>
+    </div>
+  </aside>
+
+<main>
+  <div class="head-row">
+    <div>
+      <span class="kicker" id="teamKicker">PROJECT i / 프로젝트 상세</span>
+      <h1 id="projName">프로젝트를 불러오는 중…</h1>
+      <span class="stage-now"><span class="dot"></span><span id="stageNow">–</span></span>
+    </div>
+    <div class="btn-group">
+      <button class="edit-btn" id="editBtn" hidden>수정</button>
+      <button class="edit-btn danger-btn" id="deleteBtn" hidden>삭제</button>
+    </div>
+  </div>
+  <p class="view-tag" id="viewTag" hidden>보기 전용 — 수정 권한이 없는 계정입니다</p>
+
+  <div class="block">
+    <div class="block-head">기본 정보</div>
+    <div class="kv-grid">
+      <div class="kv"><label>클라이언트</label><div class="val" id="fClient">–</div></div>
+      <div class="kv"><label>담당자</label><div class="val" id="fOwner">–</div></div>
+      <div class="kv"><label>프로젝트 일정</label><div class="val" id="fSchedule">–</div></div>
+      <div class="kv"><label>계약 금액</label><div class="val" id="fAmount">–</div></div>
+      <div class="kv"><label>진행 상태</label><div class="val" id="fStatus">–</div></div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="block-head">프리프로덕션</div>
+    <div class="item-list" id="preproList"></div>
+    <div class="add-item-row" id="preproAddRow" hidden><button class="add-item-btn" data-key="prepro">+ 항목 추가</button></div>
+    <div class="stage-files">
+      <div class="item-list" id="preproFileList"></div>
+      <div class="upload-row" id="preproUploadRow" hidden><input type="file" id="preproFileInput"><button class="edit-btn" id="preproUploadBtn" style="margin-left:12px;">파일 업로드</button></div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="block-head">프로덕션</div>
+    <div class="item-list" id="prodList"></div>
+    <div class="add-item-row" id="prodAddRow" hidden><button class="add-item-btn" data-key="prod">+ 항목 추가</button></div>
+    <div class="stage-files">
+      <div class="item-list" id="prodFileList"></div>
+      <div class="upload-row" id="prodUploadRow" hidden><input type="file" id="prodFileInput"><button class="edit-btn" id="prodUploadBtn" style="margin-left:12px;">파일 업로드</button></div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="block-head">포스트프로덕션</div>
+    <div class="item-list" id="postList"></div>
+    <div class="add-item-row" id="postAddRow" hidden><button class="add-item-btn" data-key="post">+ 항목 추가</button></div>
+    <div class="stage-files">
+      <div class="item-list" id="postFileList"></div>
+      <div class="upload-row" id="postUploadRow" hidden><input type="file" id="postFileInput"><button class="edit-btn" id="postUploadBtn" style="margin-left:12px;">파일 업로드</button></div>
+    </div>
+  </div>
+
+  <div class="block files-block">
+    <div class="block-head">파일 (내부용)</div>
+    <div class="item-list" id="fileList"></div>
+    <div class="upload-row" id="uploadRow" hidden>
+      <input type="file" id="fileInput">
+      <button class="edit-btn" id="uploadBtn" style="margin-left:12px;">업로드</button>
+    </div>
+  </div>
+
+  <div class="block files-block">
+    <div class="block-head">클라이언트 공유 — 최종본</div>
+    <div class="item-list" id="finalFileList"></div>
+    <div class="upload-row" id="finalUploadRow" hidden>
+      <input type="file" id="finalFileInput">
+      <button class="edit-btn" id="finalUploadBtn" style="margin-left:12px;">업로드</button>
+    </div>
+  </div>
+
+  <div class="block files-block">
+    <div class="block-head">클라이언트 공유 — 초안</div>
+    <div class="item-list" id="draftFileList"></div>
+    <div class="upload-row" id="draftUploadRow" hidden>
+      <input type="file" id="draftFileInput">
+      <button class="edit-btn" id="draftUploadBtn" style="margin-left:12px;">업로드</button>
+    </div>
+  </div>
+  <p class="upload-hint">※ 이 두 영역에 올린 파일은 클라이언트 자료실(client-portal.html)에서 그대로 보여요.</p>
+
+  <p class="upload-hint" id="fileHint"></p>
+
+  <div class="preview-overlay" id="previewOverlay">
+    <div class="preview-box">
+      <div class="preview-head"><span id="previewName">파일 미리보기</span><button id="previewClose">✕</button></div>
+      <div class="preview-body" id="previewBody"></div>
+    </div>
+  </div>
+
+  <p class="proto-banner">ℹ️ 이 화면은 Supabase <code>projects</code> 테이블 및 <code>project-files</code> Storage 버킷과 연결되어 있습니다. 데이터가 없으면 데모 값으로 대체 표시됩니다. 수정 권한은 <code>profiles.role</code>이 <code>admin</code> 또는 <code>editor</code>인 계정만 가집니다.</p>
+</main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  /* SUPABASE 연결 지점 — login.html / dashboard.html과 동일한 값을 넣으세요 */
+  var SUPABASE_URL = 'https://dzgavufyqmhklywyyljx.supabase.co';
+  var SUPABASE_ANON_KEY = 'sb_publishable_vNvhBnzqzrC6VFY_ygL_XA_g4tL-P4B';
+  var supabase = (SUPABASE_URL && SUPABASE_ANON_KEY)
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : null;
+
+  async function requireLogin(){
+    if(!supabase) return true;
+    var { data: { session } } = await supabase.auth.getSession();
+    if(!session){ window.location.href = 'login.html'; return false; }
+    return true;
+  }
+
+  var params = new URLSearchParams(window.location.search);
+  var team = params.get('team') === 'drone' ? 'drone' : 'i';
+  var projectId = params.get('id');
+  var projectName = params.get('name') || '이름 없는 프로젝트';
+
+  document.getElementById('backLink').href = 'dashboard.html?team=' + team;
+  document.getElementById('teamKicker').textContent = (team === 'drone' ? 'PROJECT BEE' : 'PROJECT i') + ' / 프로젝트 상세';
+  document.getElementById('projName').textContent = projectName;
+
+  document.getElementById('linkHome').href = 'dashboard.html?team=' + team;
+  document.getElementById('linkTeamI').href = 'dashboard.html?team=i';
+  document.getElementById('linkTeamDrone').href = 'dashboard.html?team=drone';
+  document.getElementById('linkTeamI').classList.toggle('active', team === 'i');
+  document.getElementById('linkTeamDrone').classList.toggle('active', team === 'drone');
+  ['Projects','Tasks','Schedule','Files','Clients','Equipment','Members'].forEach(function(name){
+    var el = document.getElementById('nav' + name);
+    if(el){
+      var t = name === 'Projects' ? 'projects' : name.toLowerCase();
+      el.href = 'management.html?type=' + t + '&team=' + team;
+    }
+  });
+
+  var canEdit = false;
+  var currentProject = null;
+  var editing = false;
+  var FILE_BUCKET = 'project-files';
+
+  // 데모 데이터 — Supabase에 projects 테이블/데이터가 아직 없을 때 보여줄 예시입니다.
+  var DEMO_DETAIL = {
+    stage: '촬영', status: 'active', client: '화순고등학교', owner: '배지원',
+    schedule: '2026.07.20 – 2026.08.05', amount: '3,200,000원',
+    prepro: [
+      { label:'기획안', status:'완료' }, { label:'시나리오', status:'완료' },
+      { label:'콘티', status:'검토 중' }, { label:'로케이션', status:'확정' },
+      { label:'배우·스태프', status:'섭외 완료' }, { label:'장비 리스트', status:'준비 완료' }
+    ],
+    prod: [
+      { label:'촬영 일정', status:'2026.07.20' }, { label:'콜시트', status:'배포 완료' },
+      { label:'촬영 보고서', status:'작성 예정' }, { label:'원본 백업', status:'진행 중' }
+    ],
+    post: [
+      { label:'편집 담당', status:'배지원' }, { label:'검수 링크', status:'미발행' },
+      { label:'수정 요청', status:'0건' }, { label:'최종 납품', status:'예정 없음' }
+    ]
+  };
+
+  function renderList(id, key, items){
+    var wrap = document.getElementById(id);
+    wrap.innerHTML = '';
+    if(!items.length && !(editing && canEdit)){
+      wrap.innerHTML = '<div class="item-row"><span class="item-status">등록된 항목이 없습니다.</span></div>';
+    }
+    items.forEach(function(it, idx){
+      var row = document.createElement('div');
+      row.className = 'item-row';
+      if(editing && canEdit){
+        row.innerHTML =
+          '<input class="label-input" data-key="'+key+'" data-idx="'+idx+'" data-field="label" value="'+(it.label||'')+'" placeholder="항목명">' +
+          '<input data-key="'+key+'" data-idx="'+idx+'" data-field="status" value="'+(it.status||'')+'" placeholder="상태">' +
+          '<button class="item-remove" data-key="'+key+'" data-idx="'+idx+'">✕</button>';
+      } else {
+        row.innerHTML = '<span>' + it.label + '</span><span class="item-status">' + it.status + '</span>';
+      }
+      wrap.appendChild(row);
+    });
+    if(editing && canEdit){
+      wrap.querySelectorAll('.item-remove').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var k = this.getAttribute('data-key');
+          currentProject[k].splice(parseInt(this.getAttribute('data-idx'),10), 1);
+          renderList(id, k, currentProject[k]);
+        });
+      });
+    }
+  }
+
+  function addItem(key){
+    var idMap = { prepro:'preproList', prod:'prodList', post:'postList' };
+    currentProject[key] = currentProject[key] || [];
+    currentProject[key].push({ label:'', status:'' });
+    renderList(idMap[key], key, currentProject[key]);
+  }
+  document.querySelectorAll('.add-item-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){ addItem(this.getAttribute('data-key')); });
+  });
+
+  function fillFields(d){
+    document.getElementById('stageNow').textContent = d.stage;
+    if(editing && canEdit){
+      document.getElementById('fClient').innerHTML = '<input id="inClient" value="'+(d.client||'')+'">';
+      document.getElementById('fOwner').innerHTML = '<input id="inOwner" value="'+(d.owner||'')+'">';
+      document.getElementById('fSchedule').innerHTML = '<input id="inSchedule" value="'+(d.schedule||'')+'">';
+      document.getElementById('fAmount').innerHTML = '<input id="inAmount" value="'+(d.amount||'')+'">';
+      document.getElementById('fStatus').innerHTML =
+        '<select id="inStatus">' +
+        '<option value="active"'+(d.status!=='completed'?' selected':'')+'>진행 중</option>' +
+        '<option value="completed"'+(d.status==='completed'?' selected':'')+'>완료</option>' +
+        '</select>';
+    } else {
+      document.getElementById('fClient').textContent = d.client || '–';
+      document.getElementById('fOwner').textContent = d.owner || '–';
+      document.getElementById('fSchedule').textContent = d.schedule || '–';
+      document.getElementById('fAmount').textContent = d.amount || '–';
+      document.getElementById('fStatus').textContent = d.status === 'completed' ? '완료' : '진행 중';
+    }
+    renderList('preproList', 'prepro', d.prepro || []);
+    renderList('prodList', 'prod', d.prod || []);
+    renderList('postList', 'post', d.post || []);
+    document.getElementById('preproAddRow').hidden = !(editing && canEdit);
+    document.getElementById('prodAddRow').hidden = !(editing && canEdit);
+    document.getElementById('postAddRow').hidden = !(editing && canEdit);
+  }
+
+  function collectFieldsFromForm(){
+    var d = currentProject || {};
+    d.client = document.getElementById('inClient') ? document.getElementById('inClient').value : d.client;
+    d.owner = document.getElementById('inOwner') ? document.getElementById('inOwner').value : d.owner;
+    d.schedule = document.getElementById('inSchedule') ? document.getElementById('inSchedule').value : d.schedule;
+    d.amount = document.getElementById('inAmount') ? document.getElementById('inAmount').value : d.amount;
+    d.status = document.getElementById('inStatus') ? document.getElementById('inStatus').value : d.status;
+    ['prepro','prod','post'].forEach(function(key){
+      var wrap = document.getElementById(key + 'List');
+      wrap.querySelectorAll('input[data-field="label"]').forEach(function(inp){
+        d[key][parseInt(inp.getAttribute('data-idx'),10)].label = inp.value;
+      });
+      wrap.querySelectorAll('input[data-field="status"]').forEach(function(inp){
+        d[key][parseInt(inp.getAttribute('data-idx'),10)].status = inp.value;
+      });
+    });
+    return d;
+  }
+
+  async function checkPermission(){
+    if(!supabase) return;
+    var { data: { session } } = await supabase.auth.getSession();
+    if(!session) return;
+    var { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single();
+    canEdit = !!(profile && (profile.role === 'admin' || profile.role === 'editor'));
+    document.getElementById('editBtn').hidden = !canEdit;
+    document.getElementById('deleteBtn').hidden = !canEdit;
+    document.getElementById('viewTag').hidden = canEdit;
+    document.getElementById('uploadRow').hidden = !canEdit;
+    document.getElementById('finalUploadRow').hidden = !canEdit;
+    document.getElementById('draftUploadRow').hidden = !canEdit;
+    document.getElementById('preproUploadRow').hidden = !canEdit;
+    document.getElementById('prodUploadRow').hidden = !canEdit;
+    document.getElementById('postUploadRow').hidden = !canEdit;
+  }
+
+  async function saveChanges(){
+    var updated = collectFieldsFromForm();
+    if(supabase && projectId){
+      var { error } = await supabase.from('projects').update({
+        client: updated.client, owner: updated.owner, schedule: updated.schedule,
+        amount: updated.amount, status: updated.status, prepro: updated.prepro, prod: updated.prod, post: updated.post
+      }).eq('id', projectId);
+      if(error){ alert('저장에 실패했습니다: ' + error.message); return; }
+    }
+    currentProject = updated;
+    editing = false;
+    document.getElementById('editBtn').textContent = '수정';
+    document.getElementById('editBtn').classList.remove('save');
+    fillFields(currentProject);
+  }
+
+  document.getElementById('editBtn').addEventListener('click', function(){
+    if(!editing){
+      editing = true;
+      this.textContent = '저장';
+      this.classList.add('save');
+      fillFields(currentProject || DEMO_DETAIL);
+    } else {
+      saveChanges();
+    }
+  });
+
+  document.getElementById('deleteBtn').addEventListener('click', async function(){
+    if(!confirm('이 프로젝트를 삭제할까요? 되돌릴 수 없습니다.')) return;
+    if(supabase && projectId){
+      var { error } = await supabase.from('projects').delete().eq('id', projectId);
+      if(error){ alert('삭제 실패: ' + error.message); return; }
+    }
+    window.location.href = 'dashboard.html?team=' + team;
+  });
+
+  /* ---------- 파일 업로드 / 다운로드 (Supabase Storage) ---------- */
+  function fileFolder(){ return team + '/' + (projectId || encodeURIComponent(projectName)); }
+  function stageFolder(stage){ return fileFolder() + '/' + stage; } // stage: 'prepro' | 'prod' | 'post'
+
+  async function loadStageFiles(stage){
+    var idMap = { prepro:'preproFileList', prod:'prodFileList', post:'postFileList' };
+    var wrap = document.getElementById(idMap[stage]);
+    if(!supabase || !projectId){
+      wrap.innerHTML = '';
+      return;
+    }
+    var { data, error } = await supabase.storage.from(FILE_BUCKET).list(stageFolder(stage));
+    if(error || !data || !data.length){
+      wrap.innerHTML = '<div class="file-row"><span class="fname">업로드된 파일이 없습니다.</span></div>';
+      return;
+    }
+    wrap.innerHTML = '';
+    data.forEach(function(f){
+      var ext = (f.name.split('.').pop() || 'FILE').toUpperCase().slice(0,4);
+      var row = document.createElement('div');
+      row.className = 'file-row';
+      var actions = '<span class="file-actions"><a href="#" data-name="'+f.name+'" class="dl-link">다운로드</a>' +
+        (canEdit ? '<button data-name="'+f.name+'" class="del-btn">삭제</button>' : '') + '</span>';
+      row.innerHTML = '<span class="fname" data-name="'+f.name+'"><span class="file-icon">'+ext+'</span>'+f.name+'</span>' + actions;
+      wrap.appendChild(row);
+    });
+    wrap.querySelectorAll('.fname').forEach(function(el){
+      el.addEventListener('click', function(){ openPreview(this.getAttribute('data-name'), FILE_BUCKET, stageFolder(stage)); });
+    });
+    wrap.querySelectorAll('.dl-link').forEach(function(a){
+      a.addEventListener('click', async function(e){
+        e.preventDefault();
+        var path = stageFolder(stage) + '/' + this.getAttribute('data-name');
+        var { data: signed } = await supabase.storage.from(FILE_BUCKET).createSignedUrl(path, 60);
+        if(signed && signed.signedUrl) window.open(signed.signedUrl, '_blank');
+      });
+    });
+    wrap.querySelectorAll('.del-btn').forEach(function(b){
+      b.addEventListener('click', async function(){
+        if(!confirm('이 파일을 삭제할까요?')) return;
+        var path = stageFolder(stage) + '/' + this.getAttribute('data-name');
+        await supabase.storage.from(FILE_BUCKET).remove([path]);
+        loadStageFiles(stage);
+      });
+    });
+  }
+
+  function wireStageUpload(stage){
+    var idMap = { prepro:['preproFileInput','preproUploadBtn'], prod:['prodFileInput','prodUploadBtn'], post:['postFileInput','postUploadBtn'] };
+    var inputId = idMap[stage][0], btnId = idMap[stage][1];
+    document.getElementById(btnId).addEventListener('click', async function(e){
+      e.preventDefault();
+      var input = document.getElementById(inputId);
+      if(!input.files.length || !supabase || !projectId) return;
+      var file = input.files[0];
+      var path = stageFolder(stage) + '/' + file.name;
+      var { error } = await supabase.storage.from(FILE_BUCKET).upload(path, file, { upsert: true });
+      if(error){ alert('업로드 실패: ' + error.message); return; }
+      input.value = '';
+      loadStageFiles(stage);
+    });
+  }
+  wireStageUpload('prepro');
+  wireStageUpload('prod');
+  wireStageUpload('post');
+
+  var IMAGE_EXT = ['jpg','jpeg','png','gif','webp'];
+  async function openPreview(name, bucket, folder){
+    var ext = (name.split('.').pop() || '').toLowerCase();
+    var path = folder + '/' + name;
+    var { data: signed } = await supabase.storage.from(bucket).createSignedUrl(path, 120);
+    var body = document.getElementById('previewBody');
+    document.getElementById('previewName').textContent = name;
+    if(!signed || !signed.signedUrl){
+      body.innerHTML = '<p>미리보기를 불러올 수 없습니다.</p>';
+    } else if(IMAGE_EXT.indexOf(ext) !== -1){
+      body.innerHTML = '<img src="'+signed.signedUrl+'">';
+    } else if(ext === 'pdf'){
+      body.innerHTML = '<iframe src="'+signed.signedUrl+'"></iframe>';
+    } else {
+      body.innerHTML = '<p>이 파일 형식은 미리보기를 지원하지 않아요. 다운로드해서 확인해주세요.</p>';
+    }
+    document.getElementById('previewOverlay').classList.add('open');
+  }
+  document.getElementById('previewClose').addEventListener('click', function(){
+    document.getElementById('previewOverlay').classList.remove('open');
+    document.getElementById('previewBody').innerHTML = '';
+  });
+  document.getElementById('previewOverlay').addEventListener('click', function(e){
+    if(e.target === this){ this.classList.remove('open'); document.getElementById('previewBody').innerHTML = ''; }
+  });
+
+  async function loadFiles(){
+    var wrap = document.getElementById('fileList');
+    if(!supabase || !projectId){
+      wrap.innerHTML = '<div class="file-row"><span class="fname">서버 연결 후 파일 목록이 표시됩니다.</span></div>';
+      document.getElementById('fileHint').textContent = '';
+      return;
+    }
+    var { data, error } = await supabase.storage.from(FILE_BUCKET).list(fileFolder());
+    if(error || !data || !data.length){
+      wrap.innerHTML = '<div class="file-row"><span class="fname">업로드된 파일이 없습니다.</span></div>';
+      return;
+    }
+    wrap.innerHTML = '';
+    data.forEach(function(f){
+      var ext = (f.name.split('.').pop() || 'FILE').toUpperCase().slice(0,4);
+      var row = document.createElement('div');
+      row.className = 'file-row';
+      var actions = '<span class="file-actions"><a href="#" data-name="'+f.name+'" class="dl-link">다운로드</a>' +
+        (canEdit ? '<button data-name="'+f.name+'" class="del-btn">삭제</button>' : '') + '</span>';
+      row.innerHTML = '<span class="fname" data-name="'+f.name+'"><span class="file-icon">'+ext+'</span>'+f.name+'</span>' + actions;
+      wrap.appendChild(row);
+    });
+    wrap.querySelectorAll('.fname').forEach(function(el){
+      el.addEventListener('click', function(){ openPreview(this.getAttribute('data-name'), FILE_BUCKET, fileFolder()); });
+    });
+    wrap.querySelectorAll('.dl-link').forEach(function(a){
+      a.addEventListener('click', async function(e){
+        e.preventDefault();
+        var path = fileFolder() + '/' + this.getAttribute('data-name');
+        var { data: signed } = await supabase.storage.from(FILE_BUCKET).createSignedUrl(path, 60);
+        if(signed && signed.signedUrl) window.open(signed.signedUrl, '_blank');
+      });
+    });
+    wrap.querySelectorAll('.del-btn').forEach(function(b){
+      b.addEventListener('click', async function(){
+        if(!confirm('이 파일을 삭제할까요?')) return;
+        var path = fileFolder() + '/' + this.getAttribute('data-name');
+        await supabase.storage.from(FILE_BUCKET).remove([path]);
+        loadFiles();
+      });
+    });
+  }
+
+  document.getElementById('uploadBtn').addEventListener('click', async function(e){
+    e.preventDefault();
+    var input = document.getElementById('fileInput');
+    if(!input.files.length || !supabase || !projectId){ return; }
+    var file = input.files[0];
+    var path = fileFolder() + '/' + file.name;
+    var { error } = await supabase.storage.from(FILE_BUCKET).upload(path, file, { upsert: true });
+    if(error){ alert('업로드 실패: ' + error.message); return; }
+    input.value = '';
+    loadFiles();
+  });
+
+  /* ---------- 클라이언트 공유 파일 (최종본 / 초안) ---------- */
+  var CLIENT_BUCKET = 'client-files';
+  function clientFolder(kind){ return team + '/' + projectId + '/' + kind; } // kind: 'final' | 'draft'
+
+  async function loadClientFiles(kind){
+    var listId = kind === 'final' ? 'finalFileList' : 'draftFileList';
+    var wrap = document.getElementById(listId);
+    if(!supabase || !projectId){
+      wrap.innerHTML = '<div class="file-row"><span class="fname">서버 연결 후 표시됩니다.</span></div>';
+      return;
+    }
+    var { data, error } = await supabase.storage.from(CLIENT_BUCKET).list(clientFolder(kind));
+    if(error || !data || !data.length){
+      wrap.innerHTML = '<div class="file-row"><span class="fname">업로드된 파일이 없습니다.</span></div>';
+      return;
+    }
+    wrap.innerHTML = '';
+    data.forEach(function(f){
+      var ext = (f.name.split('.').pop() || 'FILE').toUpperCase().slice(0,4);
+      var row = document.createElement('div');
+      row.className = 'file-row';
+      var actions = '<span class="file-actions"><a href="#" data-name="'+f.name+'" class="dl-link">다운로드</a>' +
+        (canEdit ? '<button data-name="'+f.name+'" class="del-btn">삭제</button>' : '') + '</span>';
+      row.innerHTML = '<span class="fname" data-name="'+f.name+'"><span class="file-icon">'+ext+'</span>'+f.name+'</span>' + actions;
+      wrap.appendChild(row);
+    });
+    wrap.querySelectorAll('.fname').forEach(function(el){
+      el.addEventListener('click', function(){ openPreview(this.getAttribute('data-name'), CLIENT_BUCKET, clientFolder(kind)); });
+    });
+    wrap.querySelectorAll('.dl-link').forEach(function(a){
+      a.addEventListener('click', async function(e){
+        e.preventDefault();
+        var path = clientFolder(kind) + '/' + this.getAttribute('data-name');
+        var { data: signed } = await supabase.storage.from(CLIENT_BUCKET).createSignedUrl(path, 60);
+        if(signed && signed.signedUrl) window.open(signed.signedUrl, '_blank');
+      });
+    });
+    wrap.querySelectorAll('.del-btn').forEach(function(b){
+      b.addEventListener('click', async function(){
+        if(!confirm('이 파일을 삭제할까요? 클라이언트 자료실에서도 사라집니다.')) return;
+        var path = clientFolder(kind) + '/' + this.getAttribute('data-name');
+        await supabase.storage.from(CLIENT_BUCKET).remove([path]);
+        loadClientFiles(kind);
+      });
+    });
+  }
+
+  function wireClientUpload(kind){
+    var inputId = kind === 'final' ? 'finalFileInput' : 'draftFileInput';
+    var btnId = kind === 'final' ? 'finalUploadBtn' : 'draftUploadBtn';
+    document.getElementById(btnId).addEventListener('click', async function(e){
+      e.preventDefault();
+      var input = document.getElementById(inputId);
+      if(!input.files.length || !supabase || !projectId) return;
+      var file = input.files[0];
+      var path = clientFolder(kind) + '/' + file.name;
+      var { error } = await supabase.storage.from(CLIENT_BUCKET).upload(path, file, { upsert: true });
+      if(error){ alert('업로드 실패: ' + error.message); return; }
+      input.value = '';
+      loadClientFiles(kind);
+    });
+  }
+  wireClientUpload('final');
+  wireClientUpload('draft');
+
+  /* ---------- 프로젝트 데이터 로딩 ---------- */
+  async function loadDetail(){
+    var ok = await requireLogin();
+    if(!ok) return;
+    await checkPermission();
+
+    if(supabase && projectId){
+      var { data: d, error } = await supabase.from('projects').select('*').eq('id', projectId).single();
+      if(!error && d){
+        currentProject = d;
+        document.getElementById('projName').textContent = d.name;
+        fillFields(d);
+        document.getElementById('fileHint').textContent = '';
+        loadFiles();
+        loadClientFiles('final');
+        loadClientFiles('draft');
+        loadStageFiles('prepro');
+        loadStageFiles('prod');
+        loadStageFiles('post');
+        return;
+      }
+    }
+    // Supabase 데이터가 없으면 데모로 표시
+    currentProject = JSON.parse(JSON.stringify(DEMO_DETAIL));
+    fillFields(currentProject);
+    document.getElementById('fileHint').textContent = '※ projects 테이블에 데이터가 없어 데모 값으로 표시 중입니다.';
+    loadFiles();
+  }
+
+  loadDetail();
+</script>
+
+</body>
+</html>

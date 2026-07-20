@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROJECT BEE — 사내 워크스페이스</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,600;0,700;0,800;0,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f7f6f2; --bg-alt:#eeede7; --panel:#ffffff; --ink:#131311; --ink-dim:#6f6d67;
+    --line: rgba(19,19,17,0.12); --line-strong: rgba(19,19,17,0.3);
+    --display:'Archivo', sans-serif; --body:'Inter', sans-serif; --mono:'IBM Plex Mono', monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg); color:var(--ink); font-family:var(--body); -webkit-font-smoothing:antialiased;}
+  a{color:inherit; text-decoration:none;}
+  button{font-family:inherit;}
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    height:60px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between;
+    padding:0 22px; position:sticky; top:0; background:var(--bg); z-index:50;
+  }
+  .topbar .wordmark{display:flex; align-items:center; gap:10px;}
+  .topbar .wordmark img{height:20px; width:auto; display:block;}
+  .topbar .wordmark b{font-family:var(--display); font-weight:800; font-size:15px; letter-spacing:0.02em;}
+  .top-actions{display:flex; align-items:center; gap:18px; font-family:var(--mono); font-size:11px; letter-spacing:0.04em; text-transform:uppercase; color:var(--ink-dim);}
+  .top-actions a{transition:color .2s;}
+  .top-actions a:hover{color:var(--ink);}
+  .avatar{width:28px; height:28px; border-radius:50%; background:var(--ink); color:var(--bg); display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:11px; font-weight:600;}
+
+  /* ---------- layout ---------- */
+  .layout{display:grid; grid-template-columns:220px 1fr; min-height:calc(100svh - 60px);}
+  @media (max-width:860px){.layout{grid-template-columns:1fr;}}
+
+  /* ---------- sidebar ---------- */
+  .sidebar{border-right:1px solid var(--line); padding:26px 16px;}
+  @media (max-width:860px){.sidebar{border-right:none; border-bottom:1px solid var(--line);}}
+  .side-group{margin-bottom:30px;}
+  .side-label{font-family:var(--mono); font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-dim); padding:0 10px; margin-bottom:10px; display:block;}
+  .side-link{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    padding:9px 10px; border-radius:4px; font-size:13.5px; font-weight:500; color:var(--ink-dim);
+    transition:background .15s, color .15s;
+  }
+  .side-link:hover{background:var(--bg-alt); color:var(--ink);}
+  .side-link.active{background:var(--ink); color:var(--bg);}
+  .side-link.disabled{opacity:0.4; pointer-events:none;}
+  .side-link .tag{font-family:var(--mono); font-size:9px; letter-spacing:0.03em; text-transform:uppercase; border:1px solid currentColor; padding:1px 6px; border-radius:10px; opacity:0.7;}
+
+  /* ---------- main ---------- */
+  main{padding:36px 40px 80px;}
+  @media (max-width:640px){main{padding:28px 20px 60px;}}
+  .greeting{font-family:var(--mono); font-size:12px; color:var(--ink-dim); margin-bottom:6px;}
+  h1.page-title{font-family:var(--display); font-weight:800; font-size:clamp(26px,4vw,34px);}
+  .workspace-badge{
+    display:inline-flex; align-items:center; gap:6px; margin-top:14px;
+    font-family:var(--mono); font-size:11px; letter-spacing:0.05em; text-transform:uppercase;
+    border:1px solid var(--line-strong); padding:6px 14px; border-radius:20px; color:var(--ink-dim);
+  }
+  .workspace-badge .dot{width:6px; height:6px; border-radius:50%; background:#3a8f5c;}
+
+  .stat-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); margin-top:32px; border:1px solid var(--line);}
+  @media (max-width:760px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
+  .stat-card{background:var(--panel); padding:24px;}
+  .stat-num{font-family:var(--display); font-weight:800; font-size:36px;}
+  .stat-label{font-family:var(--mono); font-size:11px; letter-spacing:0.04em; text-transform:uppercase; color:var(--ink-dim); margin-top:8px;}
+
+  .section{margin-top:48px;}
+  .section-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:18px;}
+  .section-head h2{font-family:var(--display); font-weight:800; font-size:18px;}
+  .section-head a{font-family:var(--mono); font-size:11px; letter-spacing:0.04em; text-transform:uppercase; color:var(--ink-dim); border-bottom:1px solid var(--line-strong); padding-bottom:2px;}
+
+  .project-table{border:1px solid var(--line); background:var(--panel);}
+  .project-row{display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:12px; padding:16px 18px; border-bottom:1px solid var(--line); align-items:center;}
+  .project-row:last-child{border-bottom:none;}
+  .project-row.clickable{cursor:pointer; transition:background .15s;}
+  .project-row.clickable:hover{background:var(--bg-alt);}
+  .project-row.head{background:var(--bg-alt); font-family:var(--mono); font-size:10.5px; letter-spacing:0.04em; text-transform:uppercase; color:var(--ink-dim);}
+  @media (max-width:700px){.project-row{grid-template-columns:1fr; gap:4px;}
+    .project-row.head{display:none;}
+    .project-row{padding:14px 16px;}}
+  .proj-name{font-weight:600; font-size:14px;}
+  .proj-meta{font-family:var(--mono); font-size:12px; color:var(--ink-dim);}
+  .stage-tag{
+    display:inline-block; font-family:var(--mono); font-size:10.5px; letter-spacing:0.03em;
+    padding:4px 10px; border-radius:20px; background:var(--bg-alt); color:var(--ink-dim); width:fit-content;
+  }
+  .stage-tag.active{background:#eef4ee; color:#2f6b45;}
+  .stage-tag.review{background:#fdf3e4; color:#9a6a12;}
+
+  .files-list{border:1px solid var(--line); background:var(--panel);}
+  .file-row{display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid var(--line); font-size:13.5px;}
+  .file-row:last-child{border-bottom:none;}
+  .file-row .fname{display:flex; align-items:center; gap:10px;}
+  .file-icon{width:26px; height:26px; border:1px solid var(--line-strong); border-radius:4px; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:9px; color:var(--ink-dim);}
+  .file-meta{font-family:var(--mono); font-size:11px; color:var(--ink-dim);}
+
+  .proto-banner{
+    margin-top:44px; padding:16px 18px; border:1px dashed var(--line-strong); border-radius:4px;
+    font-family:var(--mono); font-size:11.5px; color:var(--ink-dim); line-height:1.8;
+  }
+  .proto-banner b{color:var(--ink);}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wordmark"><img src="data:image/png;base64,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" alt="Project Bee"><b>PROJECT BEE</b></div>
+  <div class="top-actions">
+    <a href="#" title="알림">알림</a>
+    <a href="#" title="검색">검색</a>
+    <div class="avatar" id="avatarInitial">배</div>
+    <a href="login.html" id="logoutLink">로그아웃</a>
+  </div>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="side-group">
+      <a href="dashboard.html" class="side-link active">홈</a>
+    </div>
+
+    <div class="side-group">
+      <span class="side-label">Project Bee</span>
+      <a href="dashboard.html?team=i" class="side-link" id="linkTeamI">Project i <span class="tag" id="tagTeamI" hidden>준비 중</span></a>
+      <a href="dashboard.html?team=drone" class="side-link" id="linkTeamDrone">Project Bee <span class="tag" id="tagTeamDrone" hidden>준비 중</span></a>
+    </div>
+
+    <div class="side-group">
+      <span class="side-label">Management</span>
+      <a href="management.html?type=projects" class="side-link" id="mgmtProjects">프로젝트</a>
+      <a href="management.html?type=tasks" class="side-link" id="mgmtTasks">업무</a>
+      <a href="management.html?type=schedule" class="side-link" id="mgmtSchedule">일정</a>
+      <a href="management.html?type=files" class="side-link" id="mgmtFiles">파일</a>
+      <a href="management.html?type=clients" class="side-link" id="mgmtClients">클라이언트</a>
+      <a href="management.html?type=equipment" class="side-link" id="mgmtEquipment">장비</a>
+      <a href="management.html?type=members" class="side-link" id="mgmtMembers">구성원</a>
+    </div>
+  </aside>
+
+  <main>
+    <p class="greeting" id="greeting">안녕하세요 님.</p>
+    <h1 class="page-title" id="pageTitle">Project i</h1>
+    <span class="workspace-badge"><span class="dot"></span><span id="teamBadge">PROJECT i · 사진 영상 제작 중심</span></span>
+
+    <div class="stat-grid" id="statGrid">
+      <div class="stat-card"><div class="stat-num" id="statA">–</div><div class="stat-label">진행 중 프로젝트</div></div>
+      <div class="stat-card"><div class="stat-num" id="statB">–</div><div class="stat-label">오늘의 일정</div></div>
+      <div class="stat-card"><div class="stat-num" id="statC">–</div><div class="stat-label">검토 요청</div></div>
+      <div class="stat-card"><div class="stat-num" id="statD">–</div><div class="stat-label">납품 예정</div></div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><h2>진행 중인 프로젝트</h2><a href="#">전체 보기 →</a></div>
+      <div class="project-table" id="projectTable">
+        <div class="project-row head"><span>프로젝트</span><span>클라이언트</span><span>담당자</span><span>단계</span></div>
+        <!-- 프로젝트 행은 JS에서 채웁니다 (renderProjects) -->
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><h2>최근 파일</h2><a href="#">전체 보기 →</a></div>
+      <div class="files-list" id="filesList">
+        <!-- 파일 행은 JS에서 채웁니다 (renderFiles) -->
+      </div>
+    </div>
+
+    <p class="proto-banner" id="protoBanner">⚠ <b>서버 연결 전 데모 데이터</b> — 로그인 → 소속 팀(Project i / Project Bee) 워크스페이스로 자동 연결되는 구조를 화면으로 구현한 상태입니다. 아래 SERVER CONNECTION POINT에 API 주소만 넣으면 실제 데이터로 자동 전환됩니다.</p>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  /* =========================================================
+     SUPABASE 연결 지점 — 로그인 여부 확인 전용 (login.html과 동일한 값)
+     비워두면 로그인 없이도 화면을 볼 수 있는 프로토타입 상태로 동작합니다.
+     ========================================================= */
+  var SUPABASE_URL = 'https://dzgavufyqmhklywyyljx.supabase.co';
+  var SUPABASE_ANON_KEY = 'sb_publishable_vNvhBnzqzrC6VFY_ygL_XA_g4tL-P4B';
+  var supabase = (SUPABASE_URL && SUPABASE_ANON_KEY)
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : null;
+
+  async function requireLogin(){
+    if(!supabase) return true; // Supabase 미연결 상태 → 가드 없이 통과 (프로토타입)
+    var { data: { session } } = await supabase.auth.getSession();
+    if(!session){
+      window.location.href = 'login.html';
+      return false;
+    }
+    return true;
+  }
+
+  document.getElementById('logoutLink').addEventListener('click', async function(e){
+    if(!supabase) return; // 미연결 상태면 그냥 login.html로 이동
+    e.preventDefault();
+    await supabase.auth.signOut();
+    window.location.href = 'login.html';
+  });
+
+  /* 프로젝트 데이터는 Supabase의 projects 테이블에서 불러옵니다.
+     테이블이 비어있으면 아래 DEMO 데이터로 자동 대체됩니다. */
+
+  var params = new URLSearchParams(window.location.search);
+  var team = params.get('team') === 'drone' ? 'drone' : 'i';
+
+  var TEAM_LABEL = { i: 'PROJECT i', drone: 'PROJECT BEE' };
+  var TEAM_SUBLABEL = { i: '사진 영상 제작 중심', drone: '드론 개발 · 교육 중심' };
+
+  var DEMO = {
+    i: {
+      stats: { active: 4, todaySchedule: 2, review: 3, delivery: 1 },
+      projects: [
+        { name:'화순고 축제 중계', client:'화순고등학교', owner:'배지원', stage:'촬영', stageType:'active' },
+        { name:'망고컴 제조 공정 홍보영상', client:'주식회사 망고컴', owner:'배지원', stage:'1차 검수', stageType:'review' },
+        { name:'배우 문우주 인터뷰', client:'개인 클라이언트', owner:'배지원', stage:'편집', stageType:'' },
+        { name:'프로젝트비 드론 강의 영상', client:'Project Bee 협업', owner:'배지원', stage:'최종 납품', stageType:'' }
+      ],
+      files: [
+        { name:'화순고_축제_원본백업_0716.zip', type:'RAW', updatedAt:'2시간 전' },
+        { name:'망고컴_기획안_v3.pdf', type:'DOC', updatedAt:'어제' },
+        { name:'문우주_인터뷰_1차편집.mp4', type:'MOV', updatedAt:'2일 전' }
+      ]
+    },
+    drone: {
+      stats: { active: 0, todaySchedule: 0, review: 0, delivery: 0 },
+      projects: [],
+      files: []
+    }
+  };
+
+  function setSidebarActive(){
+    document.getElementById('linkTeamI').classList.toggle('active', team === 'i');
+    document.getElementById('linkTeamDrone').classList.toggle('active', team === 'drone');
+    ['Projects','Tasks','Schedule','Files','Clients','Equipment','Members'].forEach(function(name){
+      var el = document.getElementById('mgmt' + name);
+      if(el){
+        var t = name === 'Projects' ? 'projects' : name.toLowerCase();
+        el.href = 'management.html?type=' + t + '&team=' + team;
+      }
+    });
+  }
+
+  function renderProjects(list){
+    var table = document.getElementById('projectTable');
+    table.querySelectorAll('.project-row:not(.head)').forEach(function(el){ el.remove(); });
+    if(!list.length){
+      var empty = document.createElement('div');
+      empty.className = 'project-row';
+      empty.innerHTML = '<span class="proj-meta">아직 등록된 프로젝트가 없습니다.</span>';
+      table.appendChild(empty);
+      return;
+    }
+    list.forEach(function(p){
+      var row = document.createElement('div');
+      row.className = 'project-row clickable';
+      row.innerHTML =
+        '<span class="proj-name">' + p.name + '</span>' +
+        '<span class="proj-meta">' + p.client + '</span>' +
+        '<span class="proj-meta">' + p.owner + '</span>' +
+        '<span class="stage-tag ' + (p.stageType || '') + '">' + p.stage + '</span>';
+      row.addEventListener('click', function(){
+        var url = 'project-detail.html?team=' + team + '&name=' + encodeURIComponent(p.name);
+        if(p.id) url += '&id=' + p.id;
+        window.location.href = url;
+      });
+      table.appendChild(row);
+    });
+  }
+
+  function renderFiles(list){
+    var wrap = document.getElementById('filesList');
+    wrap.innerHTML = '';
+    if(!list.length){
+      wrap.innerHTML = '<div class="file-row"><span class="fname">최근 파일이 없습니다.</span></div>';
+      return;
+    }
+    list.forEach(function(f){
+      var row = document.createElement('div');
+      row.className = 'file-row';
+      row.innerHTML =
+        '<span class="fname"><span class="file-icon">' + f.type + '</span>' + f.name + '</span>' +
+        '<span class="file-meta">' + f.updatedAt + '</span>';
+      wrap.appendChild(row);
+    });
+  }
+
+  function timeAgo(iso){
+    var diff = (Date.now() - new Date(iso).getTime()) / 1000;
+    if(diff < 3600) return Math.max(1, Math.floor(diff/60)) + '분 전';
+    if(diff < 86400) return Math.floor(diff/3600) + '시간 전';
+    if(diff < 172800) return '어제';
+    return Math.floor(diff/86400) + '일 전';
+  }
+
+  function renderStats(s){
+    document.getElementById('statA').textContent = s.active;
+    document.getElementById('statB').textContent = s.todaySchedule;
+    document.getElementById('statC').textContent = s.review;
+    document.getElementById('statD').textContent = s.delivery;
+  }
+
+  async function loadDashboard(){
+    var ok = await requireLogin();
+    if(!ok) return; // 로그인 안 되어 있으면 login.html로 이동하고 여기서 중단
+
+    document.getElementById('pageTitle').textContent = TEAM_LABEL[team];
+    document.getElementById('teamBadge').textContent = TEAM_LABEL[team] + ' · ' + TEAM_SUBLABEL[team];
+    setSidebarActive();
+
+    if(!supabase){
+      // Supabase 미연결 상태 → 데모 데이터 표시
+      document.getElementById('greeting').textContent = '안녕하세요, 배지원 님.';
+      renderStats(DEMO[team].stats);
+      renderProjects(DEMO[team].projects);
+      renderFiles(DEMO[team].files);
+      return;
+    }
+
+    try{
+      var { data: { session } } = await supabase.auth.getSession();
+      var { data: profile } = await supabase.from('profiles').select('name').eq('id', session.user.id).single();
+      var displayName = (profile && profile.name) ? profile.name : session.user.email;
+      document.getElementById('greeting').textContent = '안녕하세요, ' + displayName + ' 님.';
+      document.getElementById('avatarInitial').textContent = displayName ? displayName[0] : '·';
+
+      var { data: projects, error: projErr } = await supabase.from('projects').select('*').eq('team', team).eq('status', 'active').order('created_at', { ascending:false });
+      if(projErr || !projects || !projects.length){
+        // projects 테이블이 비어있으면 데모로 표시
+        renderStats(DEMO[team].stats);
+        renderProjects(DEMO[team].projects);
+        renderFiles(DEMO[team].files);
+        return;
+      }
+      renderStats({
+        active: projects.length,
+        todaySchedule: DEMO[team].stats.todaySchedule,
+        review: projects.filter(function(p){ return p.stage_type === 'review'; }).length,
+        delivery: projects.filter(function(p){ return p.stage === '최종 납품'; }).length
+      });
+      renderProjects(projects.map(function(p){
+        return { id:p.id, name:p.name, client:p.client, owner:p.owner, stage:p.stage, stageType:p.stage_type };
+      }));
+
+      var { data: recentFiles } = await supabase.from('file_activity').select('*').eq('team', team).order('opened_at', { ascending:false }).limit(5);
+      if(recentFiles && recentFiles.length){
+        renderFiles(recentFiles.map(function(f){
+          return { name:f.file_name, type:(f.file_name.split('.').pop()||'FILE').toUpperCase().slice(0,4), updatedAt: timeAgo(f.opened_at) };
+        }));
+      } else {
+        renderFiles(DEMO[team].files);
+      }
+      document.getElementById('protoBanner').hidden = true;
+    }catch(err){
+      console.error('대시보드 데이터를 불러오지 못했습니다.', err);
+    }
+  }
+
+  loadDashboard();
+</script>
+
+</body>
+</html>
