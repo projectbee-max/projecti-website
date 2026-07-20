@@ -63,6 +63,23 @@
   .preview-body img{max-width:100%; max-height:78vh;}
   .preview-body iframe{width:100%; height:78vh; border:none;}
   .preview-body p{font-family:var(--mono); font-size:12px; color:var(--ink-dim); padding:40px;}
+
+  @media (max-width:640px){
+    header{padding:52px 20px 36px;}
+    header img{height:36px; margin-bottom:16px;}
+    .exit-link{top:16px; right:16px; font-size:10px;}
+
+    main{padding:36px 18px 80px;}
+    .project-block{margin-bottom:44px;}
+    .project-head{flex-direction:column; align-items:flex-start; gap:4px;}
+    .project-head h2{font-size:17px;}
+
+    .file-row{flex-wrap:wrap; gap:6px; padding:12px 14px;}
+    .file-row .fname{font-size:13px;}
+
+    .preview-overlay{padding:14px;}
+    .preview-body img, .preview-body iframe{max-height:60vh;}
+  }
 </style>
 </head>
 <body>
