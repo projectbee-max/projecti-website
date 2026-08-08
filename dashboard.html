@@ -244,9 +244,16 @@
 
     <div class="stat-grid" id="statGrid">
       <div class="stat-card"><div class="stat-num" id="statA">–</div><div class="stat-label">진행 중 프로젝트</div></div>
-      <div class="stat-card dim"><div class="stat-num">–</div><div class="stat-label">이번 주 일정 <span class="tag">준비 중</span></div></div>
+      <div class="stat-card"><div class="stat-num" id="statB">–</div><div class="stat-label">이번 주 일정</div></div>
       <div class="stat-card"><div class="stat-num" id="statC">–</div><div class="stat-label">검토 요청</div></div>
       <div class="stat-card"><div class="stat-num" id="statDoc">–</div><div class="stat-label">최근 문서</div></div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><h2>이번 주 일정</h2><a href="calendar.html">전체 보기 →</a></div>
+      <div class="files-list" id="scheduleList">
+        <!-- 일정 행은 JS에서 채웁니다 (renderSchedule) -->
+      </div>
     </div>
 
     <div class="section">
@@ -487,6 +494,32 @@
         }
       }catch(_e){
         document.getElementById('statDoc').textContent = '–';
+      }
+
+      try{
+        var todayD = new Date();
+        var weekEndD = new Date(); weekEndD.setDate(weekEndD.getDate() + 7);
+        var todayStr = todayD.toISOString().slice(0,10);
+        var weekEndStr = weekEndD.toISOString().slice(0,10);
+        var { data: schedules } = await supabase.from('schedules').select('*').eq('team', team);
+        var weekEvents = (schedules || []).filter(function(ev){ return ev.date >= todayStr && ev.date <= weekEndStr; })
+          .sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
+
+        document.getElementById('statB').textContent = weekEvents.length;
+        var schedWrap = document.getElementById('scheduleList');
+        if(weekEvents.length){
+          schedWrap.innerHTML = '';
+          weekEvents.slice(0,5).forEach(function(ev){
+            var row = document.createElement('div');
+            row.className = 'file-row';
+            row.innerHTML = '<span class="fname"><span class="file-icon">CAL</span>'+ev.title+(ev.owner ? ' <span class="file-meta">· '+ev.owner+'</span>' : '')+'</span><span class="file-meta">'+ev.date+'</span>';
+            schedWrap.appendChild(row);
+          });
+        } else {
+          schedWrap.innerHTML = '<div class="file-row"><span class="fname">이번 주 예정된 일정이 없습니다.</span></div>';
+        }
+      }catch(_e){
+        document.getElementById('statB').textContent = '–';
       }
 
       document.getElementById('protoBanner').hidden = true;
