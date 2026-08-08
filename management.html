@@ -30,6 +30,13 @@
   .sidebar{border-right:1px solid var(--line); padding:26px 16px;}
   @media (max-width:860px){.sidebar{border-right:none; border-bottom:1px solid var(--line);}}
   .side-group{margin-bottom:30px;}
+  .workspace-switch{padding-bottom:20px; border-bottom:1px solid var(--line);}
+  .ws-link{display:flex; align-items:center; gap:8px; font-family:var(--display); font-weight:800; font-size:15px; color:var(--ink); padding:6px 10px;}
+  .ws-dot{width:8px; height:8px; border-radius:2px; background:var(--ink); flex-shrink:0;}
+  .ws-caret{margin-left:auto; font-size:11px; color:var(--ink-dim);}
+  .ws-sub{display:block; font-family:var(--mono); font-size:9.5px; letter-spacing:0.1em; color:var(--ink-dim); padding:0 10px; margin-top:4px;}
+  .side-link.disabled{opacity:0.45; pointer-events:none;}
+  .side-link .tag{font-family:var(--mono); font-size:9px; letter-spacing:0.03em; text-transform:uppercase; border:1px solid currentColor; padding:1px 6px; border-radius:10px; margin-left:6px;}
   .side-label{font-family:var(--mono); font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-dim); padding:0 10px; margin-bottom:10px; display:block;}
   .side-link{display:block; padding:9px 10px; border-radius:4px; font-size:13.5px; font-weight:500; color:var(--ink-dim); transition:background .15s, color .15s; margin-bottom:2px;}
   .side-link:hover{background:var(--bg-alt); color:var(--ink);}
@@ -122,23 +129,33 @@
 
 <div class="layout">
   <aside class="sidebar">
-    <div class="side-group">
-      <a href="#" class="side-link" id="linkHome">홈</a>
+    <div class="side-group workspace-switch">
+      <a href="#" class="ws-link" id="wsSwitch"><span class="ws-dot"></span><span id="wsLabel">Project i</span><span class="ws-caret">▾</span></a>
+      <span class="ws-sub">WORKSPACE</span>
     </div>
+
     <div class="side-group">
-      <span class="side-label">Project Bee</span>
-      <a href="#" class="side-link" id="linkTeamI">Project i</a>
-      <a href="#" class="side-link" id="linkTeamDrone">Project Bee</a>
+      <a href="#" class="side-link" id="linkHome">⌂ &nbsp;Home</a>
     </div>
+
     <div class="side-group">
-      <span class="side-label">Management</span>
-      <a href="#" class="side-link" data-type="projects" id="navProjects">프로젝트</a>
-      <a href="#" class="side-link" data-type="tasks" id="navTasks">업무</a>
-      <a href="#" class="side-link" data-type="schedule" id="navSchedule">일정</a>
-      <a href="#" class="side-link" data-type="files" id="navFiles">파일</a>
-      <a href="#" class="side-link" data-type="clients" id="navClients">클라이언트</a>
-      <a href="#" class="side-link" data-type="equipment" id="navEquipment">장비</a>
-      <a href="#" class="side-link" data-type="members" id="navMembers">구성원</a>
+      <span class="side-label">Work</span>
+      <a href="#" class="side-link" data-type="projects" id="navProjects">Projects</a>
+      <a href="#" class="side-link disabled">Tasks <span class="tag">준비 중</span></a>
+      <a href="#" class="side-link disabled">Calendar <span class="tag">준비 중</span></a>
+    </div>
+
+    <div class="side-group">
+      <span class="side-label">Knowledge</span>
+      <a href="#" class="side-link" data-type="documents" id="navDocuments">Documents</a>
+      <a href="#" class="side-link" data-type="archive" id="navArchive">Archive</a>
+    </div>
+
+    <div class="side-group">
+      <span class="side-label">Company</span>
+      <a href="#" class="side-link" data-type="members" id="navMembers">Team</a>
+      <a href="#" class="side-link" data-type="clients" id="navClients">Clients</a>
+      <a href="#" class="side-link" data-type="equipment" id="navEquipment">Equipment</a>
     </div>
   </aside>
 
@@ -202,7 +219,10 @@
     members: { label:'구성원', table:'members', team_scoped:false,
       columns:[{key:'name',label:'이름',w:'1fr'},{key:'team',label:'소속팀',w:'1fr'},{key:'role',label:'역할',w:'1fr'},{key:'email',label:'이메일',w:'1.5fr'}] },
     files: { label:'파일', table:null, isFileType:true, columns:[] },
-    projects: { label:'프로젝트', table:'projects', isProjectType:true, columns:[] }
+    projects: { label:'프로젝트', table:'projects', isProjectType:true, columns:[] },
+    documents: { label:'문서', table:'documents', team_scoped:true, isDocType:true,
+      columns:[{key:'title',label:'제목',w:'1.5fr'},{key:'author',label:'작성자',w:'1fr'},{key:'content',label:'내용',w:'2.5fr'}] },
+    archive: { label:'아카이브', table:'projects', isArchiveType:true, columns:[] }
   };
 
   var params = new URLSearchParams(window.location.search);
@@ -212,13 +232,11 @@
   var canEdit = false;
 
   document.getElementById('linkHome').href = 'dashboard.html?team=' + team;
-  document.getElementById('linkTeamI').href = 'management.html?type=' + type + '&team=i';
-  document.getElementById('linkTeamDrone').href = 'management.html?type=' + type + '&team=drone';
-  document.getElementById('linkTeamI').classList.toggle('active', team === 'i');
-  document.getElementById('linkTeamDrone').classList.toggle('active', team === 'drone');
-  ['projects','tasks','schedule','files','clients','equipment','members'].forEach(function(t){
+  document.getElementById('wsLabel').textContent = team === 'drone' ? 'Project Bee' : 'Project i';
+  document.getElementById('wsSwitch').href = 'management.html?type=' + type + '&team=' + (team === 'i' ? 'drone' : 'i');
+  ['projects','documents','archive','clients','equipment','members'].forEach(function(t){
     var el = document.getElementById('nav' + t.charAt(0).toUpperCase() + t.slice(1));
-    if(el) el.href = (t === 'projects' ? 'management.html?type=projects' : 'management.html?type=' + t) + '&team=' + team;
+    if(el) el.href = 'management.html?type=' + t + '&team=' + team;
   });
 
   document.querySelectorAll('.side-link[data-type]').forEach(function(el){
@@ -291,6 +309,39 @@
   }
 
   /* ---------- 프로젝트 (전체 목록, 완료 포함) ---------- */
+  async function renderArchiveType(){
+    var wrap = document.getElementById('dataTable');
+    wrap.innerHTML = '';
+    if(!supabase){
+      wrap.innerHTML = '<div class="empty-note">서버 연결 후 아카이브가 표시됩니다.</div>';
+      return;
+    }
+    var { data, error } = await supabase.from('projects').select('*').eq('team', team).eq('status', 'completed').order('created_at', { ascending:false });
+    if(error || !data || !data.length){
+      wrap.innerHTML = '<div class="empty-note">완료된 프로젝트가 아직 없습니다. 프로젝트 상세에서 상태를 "완료"로 바꾸면 여기에 모여요.</div>';
+      return;
+    }
+    var head = document.createElement('div');
+    head.className = 'data-row head';
+    head.style.gridTemplateColumns = '2fr 1fr 1fr 1fr';
+    head.innerHTML = '<span>프로젝트</span><span>클라이언트</span><span>담당자</span><span>완료 단계</span>';
+    wrap.appendChild(head);
+    data.forEach(function(p){
+      var row = document.createElement('div');
+      row.className = 'data-row';
+      row.style.gridTemplateColumns = '2fr 1fr 1fr 1fr';
+      row.innerHTML =
+        '<span class="cell name" style="cursor:pointer;">' + p.name + '</span>' +
+        '<span class="cell">' + (p.client||'–') + '</span>' +
+        '<span class="cell">' + (p.owner||'–') + '</span>' +
+        '<span class="cell">' + (p.stage||'–') + '</span>';
+      row.querySelector('.cell.name').addEventListener('click', function(){
+        window.location.href = 'project-detail.html?team=' + p.team + '&id=' + p.id + '&name=' + encodeURIComponent(p.name);
+      });
+      wrap.appendChild(row);
+    });
+  }
+
   async function renderProjectType(){
     var wrap = document.getElementById('dataTable');
     wrap.innerHTML = '';
@@ -474,6 +525,8 @@
     } else if(cfg.isProjectType){
       buildProjectAddForm();
       renderProjectType();
+    } else if(cfg.isArchiveType){
+      renderArchiveType();
     } else {
       buildAddForm();
       loadRows();

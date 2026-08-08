@@ -39,6 +39,13 @@
   .sidebar{border-right:1px solid var(--line); padding:26px 16px;}
   @media (max-width:860px){.sidebar{border-right:none; border-bottom:1px solid var(--line);}}
   .side-group{margin-bottom:30px;}
+  .workspace-switch{padding-bottom:20px; border-bottom:1px solid var(--line);}
+  .ws-link{display:flex; align-items:center; gap:8px; font-family:var(--display); font-weight:800; font-size:15px; color:var(--ink); padding:6px 10px;}
+  .ws-dot{width:8px; height:8px; border-radius:2px; background:var(--ink); flex-shrink:0;}
+  .ws-caret{margin-left:auto; font-size:11px; color:var(--ink-dim);}
+  .ws-sub{display:block; font-family:var(--mono); font-size:9.5px; letter-spacing:0.1em; color:var(--ink-dim); padding:0 10px; margin-top:4px;}
+  .side-link.disabled{opacity:0.45; pointer-events:none;}
+  .side-link .tag{font-family:var(--mono); font-size:9px; letter-spacing:0.03em; text-transform:uppercase; border:1px solid currentColor; padding:1px 6px; border-radius:10px; margin-left:6px;}
   .side-label{font-family:var(--mono); font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-dim); padding:0 10px; margin-bottom:10px; display:block;}
   .side-link{
     display:flex; align-items:center; justify-content:space-between; gap:8px;
@@ -62,9 +69,25 @@
   }
   .workspace-badge .dot{width:6px; height:6px; border-radius:50%; background:#3a8f5c;}
 
-  .stat-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); margin-top:32px; border:1px solid var(--line);}
+  .quick-row{display:flex; flex-wrap:wrap; gap:14px; align-items:center; margin-top:32px;}
+  .search-box{flex:1; min-width:220px; display:flex; align-items:center; gap:10px; border:1px solid var(--line-strong); border-radius:4px; padding:11px 16px; background:var(--panel);}
+  .search-icon{color:var(--ink-dim); font-size:14px;}
+  .search-box input{border:none; outline:none; background:transparent; font-family:var(--body); font-size:13.5px; color:var(--ink); width:100%;}
+  .search-box input::placeholder{color:var(--ink-dim);}
+  .quick-add{display:flex; gap:8px; flex-wrap:wrap;}
+  .quick-btn{
+    font-family:var(--mono); font-size:11px; letter-spacing:0.03em; white-space:nowrap;
+    border:1px solid var(--line-strong); padding:10px 14px; border-radius:4px; color:var(--ink);
+    transition:background .2s, color .2s;
+  }
+  a.quick-btn:hover{background:var(--ink); color:var(--bg);}
+  .quick-btn.disabled{opacity:0.4; pointer-events:none;}
+
+  .stat-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); margin-top:24px; border:1px solid var(--line);}
   @media (max-width:760px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
   .stat-card{background:var(--panel); padding:24px;}
+  .stat-card.dim{opacity:0.55;}
+  .stat-card .tag{font-family:var(--mono); font-size:8.5px; letter-spacing:0.03em; text-transform:uppercase; border:1px solid currentColor; padding:1px 5px; border-radius:10px; margin-left:6px; vertical-align:middle;}
   .stat-num{font-family:var(--display); font-weight:800; font-size:36px;}
   .stat-label{font-family:var(--mono); font-size:11px; letter-spacing:0.04em; text-transform:uppercase; color:var(--ink-dim); margin-top:8px;}
 
@@ -117,6 +140,10 @@
     h1.page-title{font-size:24px;}
     .workspace-badge{font-size:10px; padding:5px 12px;}
 
+    .quick-row{flex-direction:column; align-items:stretch; margin-top:22px;}
+    .quick-add{width:100%;}
+    .quick-btn{flex:1; text-align:center; font-size:10px; padding:10px 8px;}
+
     .stat-grid{grid-template-columns:repeat(2,1fr); margin-top:24px;}
     .stat-card{padding:16px;}
     .stat-num{font-size:26px;}
@@ -148,25 +175,33 @@
 
 <div class="layout">
   <aside class="sidebar">
-    <div class="side-group">
-      <a href="dashboard.html" class="side-link active">홈</a>
+    <div class="side-group workspace-switch">
+      <a href="#" class="ws-link" id="wsSwitch"><span class="ws-dot"></span><span id="wsLabel">Project i</span><span class="ws-caret">▾</span></a>
+      <span class="ws-sub">WORKSPACE</span>
     </div>
 
     <div class="side-group">
-      <span class="side-label">Project Bee</span>
-      <a href="dashboard.html?team=i" class="side-link" id="linkTeamI">Project i <span class="tag" id="tagTeamI" hidden>준비 중</span></a>
-      <a href="dashboard.html?team=drone" class="side-link" id="linkTeamDrone">Project Bee <span class="tag" id="tagTeamDrone" hidden>준비 중</span></a>
+      <a href="dashboard.html" class="side-link active" id="linkHome">⌂ &nbsp;Home</a>
     </div>
 
     <div class="side-group">
-      <span class="side-label">Management</span>
-      <a href="management.html?type=projects" class="side-link" id="mgmtProjects">프로젝트</a>
-      <a href="management.html?type=tasks" class="side-link" id="mgmtTasks">업무</a>
-      <a href="management.html?type=schedule" class="side-link" id="mgmtSchedule">일정</a>
-      <a href="management.html?type=files" class="side-link" id="mgmtFiles">파일</a>
-      <a href="management.html?type=clients" class="side-link" id="mgmtClients">클라이언트</a>
-      <a href="management.html?type=equipment" class="side-link" id="mgmtEquipment">장비</a>
-      <a href="management.html?type=members" class="side-link" id="mgmtMembers">구성원</a>
+      <span class="side-label">Work</span>
+      <a href="management.html?type=projects" class="side-link" id="mgmtProjects">Projects</a>
+      <a href="#" class="side-link disabled">Tasks <span class="tag">준비 중</span></a>
+      <a href="#" class="side-link disabled">Calendar <span class="tag">준비 중</span></a>
+    </div>
+
+    <div class="side-group">
+      <span class="side-label">Knowledge</span>
+      <a href="management.html?type=documents" class="side-link" id="mgmtDocuments">Documents</a>
+      <a href="management.html?type=archive" class="side-link" id="mgmtArchive">Archive</a>
+    </div>
+
+    <div class="side-group">
+      <span class="side-label">Company</span>
+      <a href="management.html?type=members" class="side-link" id="mgmtMembers">Team</a>
+      <a href="management.html?type=clients" class="side-link" id="mgmtClients">Clients</a>
+      <a href="management.html?type=equipment" class="side-link" id="mgmtEquipment">Equipment</a>
     </div>
   </aside>
 
@@ -175,15 +210,25 @@
     <h1 class="page-title" id="pageTitle">Project i</h1>
     <span class="workspace-badge"><span class="dot"></span><span id="teamBadge">PROJECT i · 사진 영상 제작 중심</span></span>
 
+    <div class="quick-row">
+      <div class="search-box"><span class="search-icon">⌕</span><input type="text" placeholder="프로젝트, 문서, 업무 검색… (준비 중)" disabled></div>
+      <div class="quick-add">
+        <a href="management.html?type=projects" class="quick-btn">+ New Project</a>
+        <span class="quick-btn disabled">+ New Task</span>
+        <a href="management.html?type=documents" class="quick-btn">+ New Document</a>
+        <span class="quick-btn disabled">+ New Event</span>
+      </div>
+    </div>
+
     <div class="stat-grid" id="statGrid">
       <div class="stat-card"><div class="stat-num" id="statA">–</div><div class="stat-label">진행 중 프로젝트</div></div>
-      <div class="stat-card"><div class="stat-num" id="statB">–</div><div class="stat-label">오늘의 일정</div></div>
+      <div class="stat-card dim"><div class="stat-num">–</div><div class="stat-label">이번 주 일정 <span class="tag">준비 중</span></div></div>
       <div class="stat-card"><div class="stat-num" id="statC">–</div><div class="stat-label">검토 요청</div></div>
-      <div class="stat-card"><div class="stat-num" id="statD">–</div><div class="stat-label">납품 예정</div></div>
+      <div class="stat-card"><div class="stat-num" id="statDoc">–</div><div class="stat-label">최근 문서</div></div>
     </div>
 
     <div class="section">
-      <div class="section-head"><h2>진행 중인 프로젝트</h2><a href="#">전체 보기 →</a></div>
+      <div class="section-head"><h2>진행 중인 프로젝트</h2><a href="management.html?type=projects">전체 보기 →</a></div>
       <div class="project-table" id="projectTable">
         <div class="project-row head"><span>프로젝트</span><span>클라이언트</span><span>담당자</span><span>단계</span></div>
         <!-- 프로젝트 행은 JS에서 채웁니다 (renderProjects) -->
@@ -191,13 +236,20 @@
     </div>
 
     <div class="section">
-      <div class="section-head"><h2>최근 파일</h2><a href="#">전체 보기 →</a></div>
+      <div class="section-head"><h2>최근 문서</h2><a href="management.html?type=documents">전체 보기 →</a></div>
+      <div class="files-list" id="docsList">
+        <!-- 문서 행은 JS에서 채웁니다 (renderDocs) -->
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><h2>최근 파일</h2><a href="management.html?type=files">전체 보기 →</a></div>
       <div class="files-list" id="filesList">
         <!-- 파일 행은 JS에서 채웁니다 (renderFiles) -->
       </div>
     </div>
 
-    <p class="proto-banner" id="protoBanner">⚠ <b>서버 연결 전 데모 데이터</b> — 로그인 → 소속 팀(Project i / Project Bee) 워크스페이스로 자동 연결되는 구조를 화면으로 구현한 상태입니다. 아래 SERVER CONNECTION POINT에 API 주소만 넣으면 실제 데이터로 자동 전환됩니다.</p>
+    <p class="proto-banner" id="protoBanner">⚠ <b>서버 연결 전 데모 데이터</b> — 로그인 → 소속 워크스페이스(Project i / Project Bee)로 자동 연결되는 구조를 화면으로 구현한 상태입니다. Task·Calendar는 다음 단계에서 이어서 만듭니다.</p>
   </main>
 </div>
 
@@ -262,9 +314,10 @@
   };
 
   function setSidebarActive(){
-    document.getElementById('linkTeamI').classList.toggle('active', team === 'i');
-    document.getElementById('linkTeamDrone').classList.toggle('active', team === 'drone');
-    ['Projects','Tasks','Schedule','Files','Clients','Equipment','Members'].forEach(function(name){
+    document.getElementById('wsLabel').textContent = TEAM_LABEL[team];
+    document.getElementById('wsSwitch').href = 'dashboard.html?team=' + (team === 'i' ? 'drone' : 'i');
+    document.getElementById('linkHome').href = 'dashboard.html?team=' + team;
+    ['Projects','Documents','Archive','Members','Clients','Equipment'].forEach(function(name){
       var el = document.getElementById('mgmt' + name);
       if(el){
         var t = name === 'Projects' ? 'projects' : name.toLowerCase();
@@ -382,6 +435,26 @@
       } else {
         renderFiles(DEMO[team].files);
       }
+
+      try{
+        var { data: docs } = await supabase.from('documents').select('*').eq('team', team).order('created_at', { ascending:false }).limit(5);
+        document.getElementById('statDoc').textContent = docs ? docs.length : 0;
+        var docsWrap = document.getElementById('docsList');
+        if(docs && docs.length){
+          docsWrap.innerHTML = '';
+          docs.forEach(function(d){
+            var row = document.createElement('div');
+            row.className = 'file-row';
+            row.innerHTML = '<span class="fname"><span class="file-icon">DOC</span>'+d.title+'</span><span class="file-meta">'+timeAgo(d.created_at)+'</span>';
+            docsWrap.appendChild(row);
+          });
+        } else {
+          docsWrap.innerHTML = '<div class="file-row"><span class="fname">아직 작성된 문서가 없습니다.</span></div>';
+        }
+      }catch(_e){
+        document.getElementById('statDoc').textContent = '–';
+      }
+
       document.getElementById('protoBanner').hidden = true;
     }catch(err){
       console.error('대시보드 데이터를 불러오지 못했습니다.', err);
