@@ -30,8 +30,13 @@
   .sidebar{border-right:1px solid var(--line); padding:26px 16px;}
   @media (max-width:860px){.sidebar{border-right:none; border-bottom:1px solid var(--line);}}
   .side-group{margin-bottom:30px;}
-  .workspace-switch{padding-bottom:20px; border-bottom:1px solid var(--line);}
-  .ws-link{display:flex; align-items:center; gap:8px; font-family:var(--display); font-weight:800; font-size:15px; color:var(--ink); padding:6px 10px;}
+  .workspace-switch{position:relative; padding-bottom:20px; border-bottom:1px solid var(--line);}
+  .ws-link{display:flex; align-items:center; gap:8px; font-family:var(--display); font-weight:800; font-size:15px; color:var(--ink); padding:6px 10px; width:100%; background:none; border:none; cursor:pointer; text-align:left;}
+  .ws-menu{position:absolute; top:calc(100% - 14px); left:0; right:0; background:var(--panel); border:1px solid var(--line-strong); border-radius:4px; box-shadow:0 12px 30px rgba(0,0,0,0.12); z-index:20; overflow:hidden;}
+  .ws-option{display:block; padding:11px 14px; font-family:var(--body); font-size:13.5px; color:var(--ink-dim); border-bottom:1px solid var(--line);}
+  .ws-option:last-child{border-bottom:none;}
+  .ws-option:hover{background:var(--bg-alt); color:var(--ink);}
+  .ws-option.active{color:var(--ink); font-weight:600;}
   .ws-dot{width:8px; height:8px; border-radius:2px; background:var(--ink); flex-shrink:0;}
   .ws-caret{margin-left:auto; font-size:11px; color:var(--ink-dim);}
   .ws-sub{display:block; font-family:var(--mono); font-size:9.5px; letter-spacing:0.1em; color:var(--ink-dim); padding:0 10px; margin-top:4px;}
@@ -130,8 +135,12 @@
 <div class="layout">
   <aside class="sidebar">
     <div class="side-group workspace-switch">
-      <a href="#" class="ws-link" id="wsSwitch"><span class="ws-dot"></span><span id="wsLabel">Project i</span><span class="ws-caret">▾</span></a>
+      <button class="ws-link" id="wsSwitch" type="button"><span class="ws-dot"></span><span id="wsLabel">Project i</span><span class="ws-caret">▾</span></button>
       <span class="ws-sub">WORKSPACE</span>
+      <div class="ws-menu" id="wsMenu" hidden>
+        <a href="#" class="ws-option" data-team="i">Project i</a>
+        <a href="#" class="ws-option" data-team="drone">Project Bee</a>
+      </div>
     </div>
 
     <div class="side-group">
@@ -141,8 +150,8 @@
     <div class="side-group">
       <span class="side-label">Work</span>
       <a href="#" class="side-link" data-type="projects" id="navProjects">Projects</a>
-      <a href="#" class="side-link disabled">Tasks <span class="tag">준비 중</span></a>
-      <a href="#" class="side-link disabled">Calendar <span class="tag">준비 중</span></a>
+      <a href="#" class="side-link" id="navTasks">Tasks</a>
+      <a href="#" class="side-link" id="navCalendar">Calendar</a>
     </div>
 
     <div class="side-group">
@@ -233,7 +242,17 @@
 
   document.getElementById('linkHome').href = 'dashboard.html?team=' + team;
   document.getElementById('wsLabel').textContent = team === 'drone' ? 'Project Bee' : 'Project i';
-  document.getElementById('wsSwitch').href = 'management.html?type=' + type + '&team=' + (team === 'i' ? 'drone' : 'i');
+  document.querySelectorAll('.ws-option').forEach(function(opt){
+    opt.classList.toggle('active', opt.getAttribute('data-team') === team);
+    opt.href = 'management.html?type=' + type + '&team=' + opt.getAttribute('data-team');
+  });
+  document.getElementById('wsSwitch').addEventListener('click', function(e){
+    e.stopPropagation();
+    document.getElementById('wsMenu').hidden = !document.getElementById('wsMenu').hidden;
+  });
+  document.addEventListener('click', function(){ document.getElementById('wsMenu').hidden = true; });
+  document.getElementById('navTasks').href = 'tasks.html?team=' + team;
+  document.getElementById('navCalendar').href = 'calendar.html?team=' + team;
   ['projects','documents','archive','clients','equipment','members'].forEach(function(t){
     var el = document.getElementById('nav' + t.charAt(0).toUpperCase() + t.slice(1));
     if(el) el.href = 'management.html?type=' + t + '&team=' + team;

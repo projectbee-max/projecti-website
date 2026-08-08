@@ -29,6 +29,18 @@
   .sidebar{border-right:1px solid var(--line); padding:26px 16px;}
   @media (max-width:860px){.sidebar{border-right:none; border-bottom:1px solid var(--line);}}
   .side-group{margin-bottom:30px;}
+  .workspace-switch{position:relative; padding-bottom:20px; border-bottom:1px solid var(--line);}
+  .ws-link{display:flex; align-items:center; gap:8px; font-family:var(--display); font-weight:800; font-size:15px; color:var(--ink); padding:6px 10px; width:100%; background:none; border:none; cursor:pointer; text-align:left;}
+  .ws-dot{width:8px; height:8px; border-radius:2px; background:var(--ink); flex-shrink:0;}
+  .ws-caret{margin-left:auto; font-size:11px; color:var(--ink-dim);}
+  .ws-sub{display:block; font-family:var(--mono); font-size:9.5px; letter-spacing:0.1em; color:var(--ink-dim); padding:0 10px; margin-top:4px;}
+  .ws-menu{position:absolute; top:calc(100% - 14px); left:0; right:0; background:var(--panel); border:1px solid var(--line-strong); border-radius:4px; box-shadow:0 12px 30px rgba(0,0,0,0.12); z-index:20; overflow:hidden;}
+  .ws-option{display:block; padding:11px 14px; font-family:var(--body); font-size:13.5px; color:var(--ink-dim); border-bottom:1px solid var(--line);}
+  .ws-option:last-child{border-bottom:none;}
+  .ws-option:hover{background:var(--bg-alt); color:var(--ink);}
+  .ws-option.active{color:var(--ink); font-weight:600;}
+  .side-link.disabled{opacity:0.45; pointer-events:none;}
+  .side-link .tag{font-family:var(--mono); font-size:9px; letter-spacing:0.03em; text-transform:uppercase; border:1px solid currentColor; padding:1px 6px; border-radius:10px; margin-left:6px;}
   .side-label{font-family:var(--mono); font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-dim); padding:0 10px; margin-bottom:10px; display:block;}
   .side-link{display:block; padding:9px 10px; border-radius:4px; font-size:13.5px; font-weight:500; color:var(--ink-dim); transition:background .15s, color .15s; margin-bottom:2px;}
   .side-link:hover{background:var(--bg-alt); color:var(--ink);}
@@ -170,23 +182,37 @@
 
 <div class="layout">
   <aside class="sidebar">
-    <div class="side-group">
-      <a href="#" class="side-link" id="linkHome">홈</a>
+    <div class="side-group workspace-switch">
+      <button class="ws-link" id="wsSwitch" type="button"><span class="ws-dot"></span><span id="wsLabel">Project i</span><span class="ws-caret">▾</span></button>
+      <span class="ws-sub">WORKSPACE</span>
+      <div class="ws-menu" id="wsMenu" hidden>
+        <a href="#" class="ws-option" data-team="i">Project i</a>
+        <a href="#" class="ws-option" data-team="drone">Project Bee</a>
+      </div>
     </div>
+
     <div class="side-group">
-      <span class="side-label">Project Bee</span>
-      <a href="#" class="side-link" id="linkTeamI">Project i</a>
-      <a href="#" class="side-link" id="linkTeamDrone">Project Bee</a>
+      <a href="#" class="side-link" id="linkHome">⌂ &nbsp;Home</a>
     </div>
+
     <div class="side-group">
-      <span class="side-label">Management</span>
-      <a href="#" class="side-link" id="navProjects">프로젝트</a>
-      <a href="#" class="side-link" id="navTasks">업무</a>
-      <a href="#" class="side-link" id="navSchedule">일정</a>
-      <a href="#" class="side-link" id="navFiles">파일</a>
-      <a href="#" class="side-link" id="navClients">클라이언트</a>
-      <a href="#" class="side-link" id="navEquipment">장비</a>
-      <a href="#" class="side-link" id="navMembers">구성원</a>
+      <span class="side-label">Work</span>
+      <a href="#" class="side-link" id="navProjects">Projects</a>
+      <a href="#" class="side-link" id="navTasks">Tasks</a>
+      <a href="#" class="side-link" id="navCalendar">Calendar</a>
+    </div>
+
+    <div class="side-group">
+      <span class="side-label">Knowledge</span>
+      <a href="#" class="side-link" id="navDocuments">Documents</a>
+      <a href="#" class="side-link" id="navArchive">Archive</a>
+    </div>
+
+    <div class="side-group">
+      <span class="side-label">Company</span>
+      <a href="#" class="side-link" id="navMembers">Team</a>
+      <a href="#" class="side-link" id="navClients">Clients</a>
+      <a href="#" class="side-link" id="navEquipment">Equipment</a>
     </div>
   </aside>
 
@@ -312,15 +338,23 @@
   document.getElementById('projName').textContent = projectName;
 
   document.getElementById('linkHome').href = 'dashboard.html?team=' + team;
-  document.getElementById('linkTeamI').href = 'dashboard.html?team=i';
-  document.getElementById('linkTeamDrone').href = 'dashboard.html?team=drone';
-  document.getElementById('linkTeamI').classList.toggle('active', team === 'i');
-  document.getElementById('linkTeamDrone').classList.toggle('active', team === 'drone');
-  ['Projects','Tasks','Schedule','Files','Clients','Equipment','Members'].forEach(function(name){
+  document.getElementById('wsLabel').textContent = team === 'drone' ? 'Project Bee' : 'Project i';
+  document.querySelectorAll('.ws-option').forEach(function(opt){
+    opt.classList.toggle('active', opt.getAttribute('data-team') === team);
+    opt.href = 'dashboard.html?team=' + opt.getAttribute('data-team');
+  });
+  document.getElementById('wsSwitch').addEventListener('click', function(e){
+    e.stopPropagation();
+    document.getElementById('wsMenu').hidden = !document.getElementById('wsMenu').hidden;
+  });
+  document.addEventListener('click', function(){ document.getElementById('wsMenu').hidden = true; });
+
+  ['Projects','Tasks','Calendar','Documents','Archive','Members','Clients','Equipment'].forEach(function(name){
     var el = document.getElementById('nav' + name);
     if(el){
       var t = name === 'Projects' ? 'projects' : name.toLowerCase();
-      el.href = 'management.html?type=' + t + '&team=' + team;
+      var base = (t === 'tasks' || t === 'calendar') ? t + '.html' : 'management.html?type=' + t;
+      el.href = base + (base.indexOf('?') > -1 ? '&' : '?') + 'team=' + team;
     }
   });
 

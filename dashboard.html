@@ -39,8 +39,16 @@
   .sidebar{border-right:1px solid var(--line); padding:26px 16px;}
   @media (max-width:860px){.sidebar{border-right:none; border-bottom:1px solid var(--line);}}
   .side-group{margin-bottom:30px;}
-  .workspace-switch{padding-bottom:20px; border-bottom:1px solid var(--line);}
-  .ws-link{display:flex; align-items:center; gap:8px; font-family:var(--display); font-weight:800; font-size:15px; color:var(--ink); padding:6px 10px;}
+  .workspace-switch{position:relative; padding-bottom:20px; border-bottom:1px solid var(--line);}
+  .ws-link{display:flex; align-items:center; gap:8px; font-family:var(--display); font-weight:800; font-size:15px; color:var(--ink); padding:6px 10px; width:100%; background:none; border:none; cursor:pointer; text-align:left;}
+  .ws-dot{width:8px; height:8px; border-radius:2px; background:var(--ink); flex-shrink:0;}
+  .ws-caret{margin-left:auto; font-size:11px; color:var(--ink-dim);}
+  .ws-sub{display:block; font-family:var(--mono); font-size:9.5px; letter-spacing:0.1em; color:var(--ink-dim); padding:0 10px; margin-top:4px;}
+  .ws-menu{position:absolute; top:calc(100% - 14px); left:0; right:0; background:var(--panel); border:1px solid var(--line-strong); border-radius:4px; box-shadow:0 12px 30px rgba(0,0,0,0.12); z-index:20; overflow:hidden;}
+  .ws-option{display:block; padding:11px 14px; font-family:var(--body); font-size:13.5px; color:var(--ink-dim); border-bottom:1px solid var(--line);}
+  .ws-option:last-child{border-bottom:none;}
+  .ws-option:hover{background:var(--bg-alt); color:var(--ink);}
+  .ws-option.active{color:var(--ink); font-weight:600;}
   .ws-dot{width:8px; height:8px; border-radius:2px; background:var(--ink); flex-shrink:0;}
   .ws-caret{margin-left:auto; font-size:11px; color:var(--ink-dim);}
   .ws-sub{display:block; font-family:var(--mono); font-size:9.5px; letter-spacing:0.1em; color:var(--ink-dim); padding:0 10px; margin-top:4px;}
@@ -70,10 +78,16 @@
   .workspace-badge .dot{width:6px; height:6px; border-radius:50%; background:#3a8f5c;}
 
   .quick-row{display:flex; flex-wrap:wrap; gap:14px; align-items:center; margin-top:32px;}
-  .search-box{flex:1; min-width:220px; display:flex; align-items:center; gap:10px; border:1px solid var(--line-strong); border-radius:4px; padding:11px 16px; background:var(--panel);}
+  .search-box{flex:1; min-width:220px; display:flex; align-items:center; gap:10px; border:1px solid var(--line-strong); border-radius:4px; padding:11px 16px; background:var(--panel); position:relative;}
   .search-icon{color:var(--ink-dim); font-size:14px;}
   .search-box input{border:none; outline:none; background:transparent; font-family:var(--body); font-size:13.5px; color:var(--ink); width:100%;}
   .search-box input::placeholder{color:var(--ink-dim);}
+  .search-results{position:absolute; top:calc(100% + 6px); left:0; right:0; background:var(--panel); border:1px solid var(--line-strong); border-radius:4px; box-shadow:0 16px 40px rgba(0,0,0,0.14); z-index:30; max-height:360px; overflow-y:auto;}
+  .search-group-label{font-family:var(--mono); font-size:9.5px; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-dim); padding:10px 14px 4px;}
+  .search-item{display:block; padding:9px 14px; font-size:13px; color:var(--ink); border-bottom:1px solid var(--line);}
+  .search-item:hover{background:var(--bg-alt);}
+  .search-item .si-meta{display:block; font-family:var(--mono); font-size:10.5px; color:var(--ink-dim); margin-top:2px;}
+  .search-empty{padding:16px 14px; font-family:var(--mono); font-size:11.5px; color:var(--ink-dim);}
   .quick-add{display:flex; gap:8px; flex-wrap:wrap;}
   .quick-btn{
     font-family:var(--mono); font-size:11px; letter-spacing:0.03em; white-space:nowrap;
@@ -176,8 +190,12 @@
 <div class="layout">
   <aside class="sidebar">
     <div class="side-group workspace-switch">
-      <a href="#" class="ws-link" id="wsSwitch"><span class="ws-dot"></span><span id="wsLabel">Project i</span><span class="ws-caret">▾</span></a>
+      <button class="ws-link" id="wsSwitch" type="button"><span class="ws-dot"></span><span id="wsLabel">Project i</span><span class="ws-caret">▾</span></button>
       <span class="ws-sub">WORKSPACE</span>
+      <div class="ws-menu" id="wsMenu" hidden>
+        <a href="#" class="ws-option" data-team="i">Project i</a>
+        <a href="#" class="ws-option" data-team="drone">Project Bee</a>
+      </div>
     </div>
 
     <div class="side-group">
@@ -187,8 +205,8 @@
     <div class="side-group">
       <span class="side-label">Work</span>
       <a href="management.html?type=projects" class="side-link" id="mgmtProjects">Projects</a>
-      <a href="#" class="side-link disabled">Tasks <span class="tag">준비 중</span></a>
-      <a href="#" class="side-link disabled">Calendar <span class="tag">준비 중</span></a>
+      <a href="#" class="side-link" id="navTasks">Tasks</a>
+      <a href="#" class="side-link" id="navCalendar">Calendar</a>
     </div>
 
     <div class="side-group">
@@ -211,12 +229,16 @@
     <span class="workspace-badge"><span class="dot"></span><span id="teamBadge">PROJECT i · 사진 영상 제작 중심</span></span>
 
     <div class="quick-row">
-      <div class="search-box"><span class="search-icon">⌕</span><input type="text" placeholder="프로젝트, 문서, 업무 검색… (준비 중)" disabled></div>
+      <div class="search-box" id="searchBox">
+        <span class="search-icon">⌕</span>
+        <input type="text" id="searchInput" placeholder="프로젝트, 문서, 업무 검색…" autocomplete="off">
+        <div class="search-results" id="searchResults" hidden></div>
+      </div>
       <div class="quick-add">
         <a href="management.html?type=projects" class="quick-btn">+ New Project</a>
-        <span class="quick-btn disabled">+ New Task</span>
+        <a href="tasks.html" class="quick-btn" id="btnNewTask">+ New Task</a>
         <a href="management.html?type=documents" class="quick-btn">+ New Document</a>
-        <span class="quick-btn disabled">+ New Event</span>
+        <a href="calendar.html" class="quick-btn" id="btnNewEvent">+ New Event</a>
       </div>
     </div>
 
@@ -249,7 +271,7 @@
       </div>
     </div>
 
-    <p class="proto-banner" id="protoBanner">⚠ <b>서버 연결 전 데모 데이터</b> — 로그인 → 소속 워크스페이스(Project i / Project Bee)로 자동 연결되는 구조를 화면으로 구현한 상태입니다. Task·Calendar는 다음 단계에서 이어서 만듭니다.</p>
+    <p class="proto-banner" id="protoBanner">⚠ <b>서버 연결 전 데모 데이터</b> — 로그인 → 소속 워크스페이스(Project i / Project Bee)로 자동 연결되는 구조를 화면으로 구현한 상태입니다.</p>
   </main>
 </div>
 
@@ -315,8 +337,15 @@
 
   function setSidebarActive(){
     document.getElementById('wsLabel').textContent = TEAM_LABEL[team];
-    document.getElementById('wsSwitch').href = 'dashboard.html?team=' + (team === 'i' ? 'drone' : 'i');
     document.getElementById('linkHome').href = 'dashboard.html?team=' + team;
+    document.querySelectorAll('.ws-option').forEach(function(opt){
+      opt.classList.toggle('active', opt.getAttribute('data-team') === team);
+      opt.href = 'dashboard.html?team=' + opt.getAttribute('data-team');
+    });
+    document.getElementById('navTasks').href = 'tasks.html?team=' + team;
+    document.getElementById('navCalendar').href = 'calendar.html?team=' + team;
+    document.getElementById('btnNewTask').href = 'tasks.html?team=' + team + '&new=1';
+    document.getElementById('btnNewEvent').href = 'calendar.html?team=' + team + '&new=1';
     ['Projects','Documents','Archive','Members','Clients','Equipment'].forEach(function(name){
       var el = document.getElementById('mgmt' + name);
       if(el){
@@ -325,6 +354,11 @@
       }
     });
   }
+  document.getElementById('wsSwitch').addEventListener('click', function(e){
+    e.stopPropagation();
+    document.getElementById('wsMenu').hidden = !document.getElementById('wsMenu').hidden;
+  });
+  document.addEventListener('click', function(){ document.getElementById('wsMenu').hidden = true; });
 
   function renderProjects(list){
     var table = document.getElementById('projectTable');
@@ -458,6 +492,53 @@
       document.getElementById('protoBanner').hidden = true;
     }catch(err){
       console.error('대시보드 데이터를 불러오지 못했습니다.', err);
+    }
+  }
+
+  /* ---------- 통합 검색 ---------- */
+  var searchTimer = null;
+  document.getElementById('searchInput').addEventListener('input', function(){
+    var q = this.value.trim();
+    clearTimeout(searchTimer);
+    if(!q){ document.getElementById('searchResults').hidden = true; return; }
+    searchTimer = setTimeout(function(){ runSearch(q); }, 250);
+  });
+  document.getElementById('searchBox').addEventListener('click', function(e){ e.stopPropagation(); });
+  document.addEventListener('click', function(){ document.getElementById('searchResults').hidden = true; });
+
+  async function runSearch(q){
+    var results = document.getElementById('searchResults');
+    if(!supabase){ results.hidden = true; return; }
+    try{
+      var [projRes, docRes, taskRes] = await Promise.all([
+        supabase.from('projects').select('id,name,client,team').eq('team', team).ilike('name', '%'+q+'%').limit(5),
+        supabase.from('documents').select('id,title,team').eq('team', team).ilike('title', '%'+q+'%').limit(5),
+        supabase.from('tasks').select('id,title,team').eq('team', team).ilike('title', '%'+q+'%').limit(5)
+      ]);
+      var html = '';
+      if(projRes.data && projRes.data.length){
+        html += '<div class="search-group-label">Projects</div>';
+        projRes.data.forEach(function(p){
+          html += '<a class="search-item" href="project-detail.html?team='+p.team+'&id='+p.id+'&name='+encodeURIComponent(p.name)+'">'+p.name+'<span class="si-meta">'+(p.client||'')+'</span></a>';
+        });
+      }
+      if(docRes.data && docRes.data.length){
+        html += '<div class="search-group-label">Documents</div>';
+        docRes.data.forEach(function(d){
+          html += '<a class="search-item" href="management.html?type=documents&team='+d.team+'">'+d.title+'</a>';
+        });
+      }
+      if(taskRes.data && taskRes.data.length){
+        html += '<div class="search-group-label">Tasks</div>';
+        taskRes.data.forEach(function(t){
+          html += '<a class="search-item" href="tasks.html?team='+t.team+'">'+t.title+'</a>';
+        });
+      }
+      results.innerHTML = html || '<div class="search-empty">검색 결과가 없습니다.</div>';
+      results.hidden = false;
+    }catch(err){
+      results.innerHTML = '<div class="search-empty">검색 중 오류가 발생했습니다.</div>';
+      results.hidden = false;
     }
   }
 

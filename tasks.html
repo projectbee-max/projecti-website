@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROJECT BEE — Tasks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,600;0,700;0,800;0,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f7f6f2; --bg-alt:#eeede7; --panel:#ffffff; --ink:#131311; --ink-dim:#6f6d67;
+    --line: rgba(19,19,17,0.12); --line-strong: rgba(19,19,17,0.3);
+    --display:'Archivo', sans-serif; --body:'Inter', sans-serif; --mono:'IBM Plex Mono', monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg); color:var(--ink); font-family:var(--body); -webkit-font-smoothing:antialiased;}
+  a{color:inherit; text-decoration:none;}
+  button{font-family:inherit;}
+
+  .topbar{height:60px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; padding:0 22px; position:sticky; top:0; background:var(--bg); z-index:50;}
+  .wordmark{display:flex; align-items:center; gap:10px;}
+  .wordmark img{height:20px; width:auto;}
+  .wordmark b{font-family:var(--display); font-weight:800; font-size:15px;}
+  .top-actions{display:flex; align-items:center; gap:18px; font-family:var(--mono); font-size:11px; letter-spacing:0.04em; text-transform:uppercase; color:var(--ink-dim);}
+  .avatar{width:28px; height:28px; border-radius:50%; background:var(--ink); color:var(--bg); display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:11px; font-weight:600;}
+
+  .layout{display:grid; grid-template-columns:220px 1fr; min-height:calc(100svh - 60px);}
+  @media (max-width:860px){.layout{grid-template-columns:1fr;}}
+  .sidebar{border-right:1px solid var(--line); padding:26px 16px;}
+  @media (max-width:860px){.sidebar{border-right:none; border-bottom:1px solid var(--line);}}
+  .side-group{margin-bottom:30px;}
+  .workspace-switch{position:relative; padding-bottom:20px; border-bottom:1px solid var(--line);}
+  .ws-link{display:flex; align-items:center; gap:8px; font-family:var(--display); font-weight:800; font-size:15px; color:var(--ink); padding:6px 10px; width:100%; background:none; border:none; cursor:pointer; text-align:left;}
+  .ws-dot{width:8px; height:8px; border-radius:2px; background:var(--ink); flex-shrink:0;}
+  .ws-caret{margin-left:auto; font-size:11px; color:var(--ink-dim);}
+  .ws-sub{display:block; font-family:var(--mono); font-size:9.5px; letter-spacing:0.1em; color:var(--ink-dim); padding:0 10px; margin-top:4px;}
+  .ws-menu{position:absolute; top:calc(100% - 14px); left:0; right:0; background:var(--panel); border:1px solid var(--line-strong); border-radius:4px; box-shadow:0 12px 30px rgba(0,0,0,0.12); z-index:20; overflow:hidden;}
+  .ws-option{display:block; padding:11px 14px; font-family:var(--body); font-size:13.5px; color:var(--ink-dim); border-bottom:1px solid var(--line);}
+  .ws-option:last-child{border-bottom:none;}
+  .ws-option:hover{background:var(--bg-alt); color:var(--ink);}
+  .ws-option.active{color:var(--ink); font-weight:600;}
+  .side-label{font-family:var(--mono); font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-dim); padding:0 10px; margin-bottom:10px; display:block;}
+  .side-link{display:block; padding:9px 10px; border-radius:4px; font-size:13.5px; font-weight:500; color:var(--ink-dim); transition:background .15s, color .15s; margin-bottom:2px;}
+  .side-link:hover{background:var(--bg-alt); color:var(--ink);}
+  .side-link.active{background:var(--ink); color:var(--bg);}
+
+  main{padding:36px 40px 80px;}
+  @media (max-width:640px){main{padding:24px 16px 60px;}}
+  .head-row{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+  .kicker{font-family:var(--mono); font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-dim); display:block; margin-bottom:8px;}
+  h1{font-family:var(--display); font-weight:800; font-size:clamp(24px,4vw,30px);}
+  .view-toggle{display:flex; gap:2px; border:1px solid var(--line-strong); border-radius:4px; overflow:hidden;}
+  .view-toggle button{font-family:var(--mono); font-size:11px; letter-spacing:0.03em; padding:9px 16px; background:var(--panel); color:var(--ink-dim); border:none; cursor:pointer;}
+  .view-toggle button.active{background:var(--ink); color:var(--bg);}
+  .add-btn{font-family:var(--mono); font-size:11.5px; letter-spacing:0.05em; text-transform:uppercase; background:var(--ink); color:var(--bg); border:none; padding:11px 20px; border-radius:1px; cursor:pointer;}
+
+  .add-form{margin-top:20px; border:1px solid var(--line); background:var(--panel); padding:20px; display:none;}
+  .add-form.open{display:block;}
+  .add-form .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+  @media (max-width:700px){.add-form .grid{grid-template-columns:1fr 1fr;}}
+  @media (max-width:480px){.add-form .grid{grid-template-columns:1fr;}}
+  .add-form label{display:block; font-family:var(--mono); font-size:10.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:8px;}
+  .add-form input, .add-form select{width:100%; border:none; border-bottom:1px solid var(--line-strong); background:transparent; padding:8px 2px; font-size:14px; outline:none;}
+  .add-form .actions{margin-top:20px; display:flex; gap:10px;}
+  .add-form button.save-btn{background:var(--ink); color:var(--bg); border:none; font-family:var(--mono); font-size:11.5px; padding:10px 18px; border-radius:1px; cursor:pointer;}
+  .add-form button.cancel-btn{background:none; border:1px solid var(--line-strong); font-family:var(--mono); font-size:11.5px; padding:10px 18px; border-radius:1px; cursor:pointer;}
+
+  .task-section{margin-top:36px;}
+  .task-section-label{font-family:var(--mono); font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:12px;}
+  .task-list{border:1px solid var(--line); background:var(--panel);}
+  .task-row{display:flex; align-items:center; gap:14px; padding:14px 18px; border-bottom:1px solid var(--line);}
+  .task-row:last-child{border-bottom:none;}
+  .task-title{flex:1; font-size:14px; font-weight:500;}
+  .task-title.done{text-decoration:line-through; color:var(--ink-dim);}
+  .task-meta{font-family:var(--mono); font-size:11px; color:var(--ink-dim); white-space:nowrap;}
+  .priority-dot{width:7px; height:7px; border-radius:50%; flex-shrink:0;}
+  .priority-high{background:#b3432f;}
+  .priority-mid{background:#c98a1f;}
+  .priority-low{background:#8a8a86;}
+  .task-status-select{font-family:var(--mono); font-size:10.5px; border:1px solid var(--line-strong); border-radius:20px; padding:4px 10px; background:var(--panel); color:var(--ink);}
+  .task-del{background:none; border:none; color:#b3432f; font-family:var(--mono); font-size:11px; cursor:pointer;}
+  .empty-note{padding:20px 18px; font-family:var(--mono); font-size:12px; color:var(--ink-dim);}
+
+  .board{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:20px;}
+  @media (max-width:760px){.board{grid-template-columns:1fr;}}
+  .board-col{background:var(--panel); border:1px solid var(--line);}
+  .board-col-head{padding:14px 16px; border-bottom:1px solid var(--line); font-family:var(--mono); font-size:11px; letter-spacing:0.04em; text-transform:uppercase; color:var(--ink-dim); background:var(--bg-alt);}
+  .board-card{padding:12px 16px; border-bottom:1px solid var(--line); font-size:13px;}
+  .board-card:last-child{border-bottom:none;}
+  .board-card .bc-meta{display:block; font-family:var(--mono); font-size:10.5px; color:var(--ink-dim); margin-top:6px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wordmark"><img src="data:image/png;base64,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" alt="Project Bee"><b>PROJECT BEE</b></div>
+  <div class="top-actions">
+    <div class="avatar" id="avatarInitial">·</div>
+    <a href="login.html">로그아웃</a>
+  </div>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="side-group workspace-switch">
+      <button class="ws-link" id="wsSwitch" type="button"><span class="ws-dot"></span><span id="wsLabel">Project i</span><span class="ws-caret">▾</span></button>
+      <span class="ws-sub">WORKSPACE</span>
+      <div class="ws-menu" id="wsMenu" hidden>
+        <a href="#" class="ws-option" data-team="i">Project i</a>
+        <a href="#" class="ws-option" data-team="drone">Project Bee</a>
+      </div>
+    </div>
+    <div class="side-group"><a href="#" class="side-link" id="linkHome">⌂ &nbsp;Home</a></div>
+    <div class="side-group">
+      <span class="side-label">Work</span>
+      <a href="#" class="side-link" id="navProjects">Projects</a>
+      <a href="#" class="side-link active" id="navTasks">Tasks</a>
+      <a href="#" class="side-link" id="navCalendar">Calendar</a>
+    </div>
+    <div class="side-group">
+      <span class="side-label">Knowledge</span>
+      <a href="#" class="side-link" id="navDocuments">Documents</a>
+      <a href="#" class="side-link" id="navArchive">Archive</a>
+    </div>
+    <div class="side-group">
+      <span class="side-label">Company</span>
+      <a href="#" class="side-link" id="navMembers">Team</a>
+      <a href="#" class="side-link" id="navClients">Clients</a>
+      <a href="#" class="side-link" id="navEquipment">Equipment</a>
+    </div>
+  </aside>
+
+  <main>
+    <div class="head-row">
+      <div>
+        <span class="kicker" id="kicker">PROJECT i · WORK</span>
+        <h1>Tasks</h1>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <div class="view-toggle">
+          <button id="btnList" class="active">List</button>
+          <button id="btnBoard">Board</button>
+        </div>
+        <button class="add-btn" id="addBtn" hidden>+ 추가</button>
+      </div>
+    </div>
+
+    <div class="add-form" id="addForm">
+      <div class="grid">
+        <div><label>업무명</label><input id="fTitle" placeholder="업무명"></div>
+        <div><label>연결 프로젝트</label><select id="fProject"><option value="">선택 안 함</option></select></div>
+        <div><label>담당자</label><input id="fAssignee" placeholder="담당자"></div>
+        <div><label>우선순위</label><select id="fPriority"><option value="mid">보통</option><option value="high">높음</option><option value="low">낮음</option></select></div>
+        <div><label>마감일</label><input id="fDue" type="date"></div>
+        <div><label>상태</label><select id="fStatus"><option value="todo">할 일</option><option value="doing">진행중</option><option value="done">완료</option></select></div>
+      </div>
+      <div class="actions">
+        <button class="save-btn" id="saveBtn">저장</button>
+        <button class="cancel-btn" id="cancelBtn" type="button">취소</button>
+      </div>
+    </div>
+
+    <div id="listView">
+      <div class="task-section">
+        <div class="task-section-label">오늘</div>
+        <div class="task-list" id="todayList"></div>
+      </div>
+      <div class="task-section">
+        <div class="task-section-label">이번 주</div>
+        <div class="task-list" id="weekList"></div>
+      </div>
+      <div class="task-section">
+        <div class="task-section-label">전체</div>
+        <div class="task-list" id="allList"></div>
+      </div>
+    </div>
+
+    <div id="boardView" class="board" hidden>
+      <div class="board-col"><div class="board-col-head">할 일</div><div id="boardTodo"></div></div>
+      <div class="board-col"><div class="board-col-head">진행중</div><div id="boardDoing"></div></div>
+      <div class="board-col"><div class="board-col-head">완료</div><div id="boardDone"></div></div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  var SUPABASE_URL = 'https://dzgavufyqmhklywyyljx.supabase.co';
+  var SUPABASE_ANON_KEY = 'sb_publishable_vNvhBnzqzrC6VFY_ygL_XA_g4tL-P4B';
+  var supabase = (SUPABASE_URL && SUPABASE_ANON_KEY)
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : null;
+
+  async function requireLogin(){
+    if(!supabase) return true;
+    var { data: { session } } = await supabase.auth.getSession();
+    if(!session){ window.location.href = 'login.html'; return false; }
+    return true;
+  }
+
+  var params = new URLSearchParams(window.location.search);
+  var team = params.get('team') === 'drone' ? 'drone' : 'i';
+  var canEdit = false;
+  var allTasks = [];
+  var projectMap = {};
+
+  document.getElementById('linkHome').href = 'dashboard.html?team=' + team;
+  document.getElementById('kicker').textContent = (team === 'drone' ? 'PROJECT BEE' : 'PROJECT i') + ' · WORK';
+  document.getElementById('wsLabel').textContent = team === 'drone' ? 'Project Bee' : 'Project i';
+  document.querySelectorAll('.ws-option').forEach(function(opt){
+    opt.classList.toggle('active', opt.getAttribute('data-team') === team);
+    opt.href = 'tasks.html?team=' + opt.getAttribute('data-team');
+  });
+  document.getElementById('wsSwitch').addEventListener('click', function(e){
+    e.stopPropagation();
+    document.getElementById('wsMenu').hidden = !document.getElementById('wsMenu').hidden;
+  });
+  document.addEventListener('click', function(){ document.getElementById('wsMenu').hidden = true; });
+  document.getElementById('navProjects').href = 'management.html?type=projects&team=' + team;
+  document.getElementById('navCalendar').href = 'calendar.html?team=' + team;
+  document.getElementById('navDocuments').href = 'management.html?type=documents&team=' + team;
+  document.getElementById('navArchive').href = 'management.html?type=archive&team=' + team;
+  document.getElementById('navMembers').href = 'management.html?type=members&team=' + team;
+  document.getElementById('navClients').href = 'management.html?type=clients&team=' + team;
+  document.getElementById('navEquipment').href = 'management.html?type=equipment&team=' + team;
+
+  function todayStr(){ return new Date().toISOString().slice(0,10); }
+  function weekEndStr(){ var d = new Date(); d.setDate(d.getDate()+7); return d.toISOString().slice(0,10); }
+
+  function taskRowHTML(t){
+    var pClass = t.priority === 'high' ? 'priority-high' : (t.priority === 'low' ? 'priority-low' : 'priority-mid');
+    var projName = t.project_id && projectMap[t.project_id] ? projectMap[t.project_id] : '';
+    return '<div class="task-row" data-id="'+t.id+'">' +
+      '<span class="priority-dot '+pClass+'"></span>' +
+      '<span class="task-title'+(t.status==='done'?' done':'')+'">'+t.title+(projName ? ' <span class="task-meta">· '+projName+'</span>' : '')+'</span>' +
+      '<span class="task-meta">'+(t.assignee||'')+'</span>' +
+      '<span class="task-meta">'+(t.due_date||'')+'</span>' +
+      (canEdit ?
+        '<select class="task-status-select" data-id="'+t.id+'">' +
+          '<option value="todo"'+(t.status==='todo'?' selected':'')+'>할 일</option>' +
+          '<option value="doing"'+(t.status==='doing'?' selected':'')+'>진행중</option>' +
+          '<option value="done"'+(t.status==='done'?' selected':'')+'>완료</option>' +
+        '</select><button class="task-del" data-id="'+t.id+'">삭제</button>'
+        : '<span class="task-meta">'+(t.status==='done'?'완료':t.status==='doing'?'진행중':'할 일')+'</span>') +
+      '</div>';
+  }
+
+  function renderList(){
+    var today = todayStr(), weekEnd = weekEndStr();
+    var todayTasks = allTasks.filter(function(t){ return t.due_date === today; });
+    var weekTasks = allTasks.filter(function(t){ return t.due_date && t.due_date > today && t.due_date <= weekEnd; });
+
+    document.getElementById('todayList').innerHTML = todayTasks.length ? todayTasks.map(taskRowHTML).join('') : '<div class="empty-note">오늘 마감인 업무가 없습니다.</div>';
+    document.getElementById('weekList').innerHTML = weekTasks.length ? weekTasks.map(taskRowHTML).join('') : '<div class="empty-note">이번 주 마감인 업무가 없습니다.</div>';
+    document.getElementById('allList').innerHTML = allTasks.length ? allTasks.map(taskRowHTML).join('') : '<div class="empty-note">등록된 업무가 없습니다.</div>';
+    wireRowEvents();
+  }
+
+  function renderBoard(){
+    ['todo','doing','done'].forEach(function(s){
+      var col = document.getElementById('board' + s.charAt(0).toUpperCase() + s.slice(1));
+      var items = allTasks.filter(function(t){ return t.status === s; });
+      col.innerHTML = items.length ? items.map(function(t){
+        var pClass = t.priority === 'high' ? 'priority-high' : (t.priority === 'low' ? 'priority-low' : 'priority-mid');
+        return '<div class="board-card"><span class="priority-dot '+pClass+'"></span> '+t.title+'<span class="bc-meta">'+(t.assignee||'')+' · '+(t.due_date||'미정')+'</span></div>';
+      }).join('') : '<div class="empty-note">없음</div>';
+    });
+  }
+
+  function wireRowEvents(){
+    document.querySelectorAll('.task-status-select').forEach(function(sel){
+      sel.addEventListener('change', async function(){
+        var id = this.getAttribute('data-id');
+        if(supabase) await supabase.from('tasks').update({ status: this.value }).eq('id', id);
+        var t = allTasks.find(function(x){ return String(x.id) === String(id); });
+        if(t) t.status = this.value;
+        renderList();
+      });
+    });
+    document.querySelectorAll('.task-del').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        if(!confirm('이 업무를 삭제할까요?')) return;
+        var id = this.getAttribute('data-id');
+        if(supabase) await supabase.from('tasks').delete().eq('id', id);
+        allTasks = allTasks.filter(function(x){ return String(x.id) !== String(id); });
+        renderList();
+      });
+    });
+  }
+
+  document.getElementById('btnList').addEventListener('click', function(){
+    this.classList.add('active'); document.getElementById('btnBoard').classList.remove('active');
+    document.getElementById('listView').hidden = false; document.getElementById('boardView').hidden = true;
+  });
+  document.getElementById('btnBoard').addEventListener('click', function(){
+    this.classList.add('active'); document.getElementById('btnList').classList.remove('active');
+    document.getElementById('listView').hidden = true; document.getElementById('boardView').hidden = false;
+    renderBoard();
+  });
+
+  document.getElementById('addBtn').addEventListener('click', function(){
+    document.getElementById('addForm').classList.add('open');
+  });
+  document.getElementById('cancelBtn').addEventListener('click', function(){
+    document.getElementById('addForm').classList.remove('open');
+  });
+  document.getElementById('saveBtn').addEventListener('click', async function(){
+    var payload = {
+      team: team,
+      title: document.getElementById('fTitle').value,
+      project_id: document.getElementById('fProject').value || null,
+      assignee: document.getElementById('fAssignee').value,
+      priority: document.getElementById('fPriority').value,
+      due_date: document.getElementById('fDue').value || null,
+      status: document.getElementById('fStatus').value
+    };
+    if(!payload.title){ alert('업무명을 입력해주세요.'); return; }
+    if(supabase){
+      var { data, error } = await supabase.from('tasks').insert(payload).select().single();
+      if(error){ alert('저장 실패: ' + error.message); return; }
+      allTasks.unshift(data);
+    } else {
+      payload.id = 'local-' + Date.now();
+      allTasks.unshift(payload);
+    }
+    document.getElementById('addForm').classList.remove('open');
+    document.getElementById('fTitle').value = '';
+    renderList();
+  });
+
+  async function loadProjects(){
+    var sel = document.getElementById('fProject');
+    if(!supabase) return;
+    var { data } = await supabase.from('projects').select('id,name').eq('team', team);
+    if(data) data.forEach(function(p){
+      projectMap[p.id] = p.name;
+      var opt = document.createElement('option');
+      opt.value = p.id; opt.textContent = p.name;
+      sel.appendChild(opt);
+    });
+  }
+
+  async function checkPermission(){
+    if(!supabase) return;
+    var { data: { session } } = await supabase.auth.getSession();
+    if(!session) return;
+    var { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single();
+    canEdit = !!(profile && (profile.role === 'admin' || profile.role === 'editor'));
+    document.getElementById('addBtn').hidden = !canEdit;
+  }
+
+  async function init(){
+    var ok = await requireLogin();
+    if(!ok) return;
+    await checkPermission();
+    await loadProjects();
+
+    if(supabase){
+      var { data } = await supabase.from('tasks').select('*').eq('team', team).order('due_date', { ascending:true, nullsFirst:false });
+      allTasks = data || [];
+    }
+    renderList();
+
+    if(params.get('new') === '1' && canEdit) document.getElementById('addForm').classList.add('open');
+  }
+
+  init();
+</script>
+
+</body>
+</html>
