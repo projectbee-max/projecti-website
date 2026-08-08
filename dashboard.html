@@ -99,6 +99,30 @@
 
   .stat-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); margin-top:24px; border:1px solid var(--line);}
   @media (max-width:760px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
+
+  .month-nav{display:flex; align-items:center; gap:14px;}
+  .month-nav button{background:none; border:1px solid var(--line-strong); width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:13px;}
+  .month-label{font-family:var(--display); font-weight:800; font-size:16px;}
+  .cal-grid{margin-top:14px; border:1px solid var(--line); background:var(--line); display:grid; grid-template-columns:repeat(7,1fr); gap:1px;}
+  .cal-dow{background:var(--bg-alt); text-align:center; padding:8px 0; font-family:var(--mono); font-size:10px; letter-spacing:0.04em; color:var(--ink-dim);}
+  .cal-cell{background:var(--panel); min-height:78px; padding:7px; position:relative;}
+  .cal-cell.empty{background:var(--bg);}
+  .cal-cell.clickable{cursor:pointer; transition:background .15s;}
+  .cal-cell.clickable:hover{background:var(--bg-alt);}
+  .cal-cell .cnum{font-family:var(--mono); font-size:10.5px; color:var(--ink-dim);}
+  .cal-cell.today .cnum{color:var(--ink); font-weight:700;}
+  .cal-event{margin-top:4px; font-size:9.5px; padding:2px 5px; border-radius:2px; background:var(--bg-alt); color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  @media (max-width:640px){.cal-cell{min-height:52px; padding:4px;} .cal-event{font-size:8.5px;}}
+
+  .add-form{margin-top:16px; border:1px solid var(--line); background:var(--panel); padding:18px; display:none;}
+  .add-form.open{display:block;}
+  .add-form-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  @media (max-width:640px){.add-form-grid{grid-template-columns:1fr;}}
+  .add-form-grid label{display:block; font-family:var(--mono); font-size:10.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:8px;}
+  .add-form-grid input{width:100%; border:none; border-bottom:1px solid var(--line-strong); background:transparent; padding:8px 2px; font-size:14px; outline:none;}
+  .add-form-actions{margin-top:16px; display:flex; gap:10px;}
+  .add-form-actions .save-btn{background:var(--ink); color:var(--bg); border:none; font-family:var(--mono); font-size:11.5px; padding:10px 18px; border-radius:1px; cursor:pointer;}
+  .add-form-actions .cancel-btn{background:none; border:1px solid var(--line-strong); font-family:var(--mono); font-size:11.5px; padding:10px 18px; border-radius:1px; cursor:pointer;}
   .stat-card{background:var(--panel); padding:24px;}
   .stat-card.dim{opacity:0.55;}
   .stat-card .tag{font-family:var(--mono); font-size:8.5px; letter-spacing:0.03em; text-transform:uppercase; border:1px solid currentColor; padding:1px 5px; border-radius:10px; margin-left:6px; vertical-align:middle;}
@@ -250,9 +274,29 @@
     </div>
 
     <div class="section">
-      <div class="section-head"><h2>이번 주 일정</h2><a href="calendar.html">전체 보기 →</a></div>
-      <div class="files-list" id="scheduleList">
-        <!-- 일정 행은 JS에서 채웁니다 (renderSchedule) -->
+      <div class="section-head">
+        <h2>Calendar</h2>
+        <div style="display:flex; align-items:center; gap:16px;">
+          <div class="month-nav">
+            <button id="prevMonth">‹</button>
+            <span class="month-label" id="monthLabel">–</span>
+            <button id="nextMonth">›</button>
+          </div>
+          <a href="calendar.html">전체 화면 →</a>
+        </div>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+
+      <div class="add-form" id="addForm">
+        <div class="add-form-grid">
+          <div><label>일정명</label><input id="fTitle" placeholder="예: Daddy Bot 촬영"></div>
+          <div><label>날짜</label><input id="fDate" type="date"></div>
+          <div><label>담당자</label><input id="fOwner" placeholder="담당자"></div>
+        </div>
+        <div class="add-form-actions">
+          <button class="save-btn" id="saveBtn">저장</button>
+          <button class="cancel-btn" id="cancelBtn" type="button">취소</button>
+        </div>
       </div>
     </div>
 
@@ -316,6 +360,9 @@
 
   var params = new URLSearchParams(window.location.search);
   var team = params.get('team') === 'drone' ? 'drone' : 'i';
+  var canEdit = false;
+  var calEvents = [];
+  var calViewDate = new Date();
 
   var TEAM_LABEL = { i: 'PROJECT i', drone: 'PROJECT BEE' };
   var TEAM_SUBLABEL = { i: '사진 영상 제작 중심', drone: '드론 개발 · 교육 중심' };
@@ -426,13 +473,81 @@
     document.getElementById('statD').textContent = s.delivery;
   }
 
+  async function checkPermission(){
+    if(!supabase) return;
+    var { data: { session } } = await supabase.auth.getSession();
+    if(!session) return;
+    var { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single();
+    canEdit = !!(profile && (profile.role === 'admin' || profile.role === 'editor'));
+  }
+
+  function renderMiniCalendar(){
+    var y = calViewDate.getFullYear(), m = calViewDate.getMonth();
+    document.getElementById('monthLabel').textContent = y + '년 ' + (m+1) + '월';
+    var grid = document.getElementById('calGrid');
+    grid.innerHTML = '';
+    ['일','월','화','수','목','금','토'].forEach(function(d){
+      var el = document.createElement('div'); el.className = 'cal-dow'; el.textContent = d; grid.appendChild(el);
+    });
+    var firstDow = new Date(y, m, 1).getDay();
+    var daysInMonth = new Date(y, m+1, 0).getDate();
+    var todayStr = new Date().toISOString().slice(0,10);
+
+    for(var i=0; i<firstDow; i++){
+      var e = document.createElement('div'); e.className = 'cal-cell empty'; grid.appendChild(e);
+    }
+    for(var d=1; d<=daysInMonth; d++){
+      var dateStr = y + '-' + String(m+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+      var cell = document.createElement('div');
+      cell.className = 'cal-cell' + (dateStr === todayStr ? ' today' : '') + (canEdit ? ' clickable' : '');
+      var html = '<span class="cnum">' + d + '</span>';
+      calEvents.filter(function(ev){ return ev.date === dateStr; }).forEach(function(ev){
+        html += '<div class="cal-event">' + ev.title + '</div>';
+      });
+      cell.innerHTML = html;
+      if(canEdit){
+        (function(ds){ cell.addEventListener('click', function(){ openAddForDate(ds); }); })(dateStr);
+      }
+      grid.appendChild(cell);
+    }
+  }
+
+  function openAddForDate(dateStr){
+    document.getElementById('fDate').value = dateStr;
+    document.getElementById('addForm').classList.add('open');
+    document.getElementById('fTitle').focus();
+  }
+
+  document.getElementById('prevMonth').addEventListener('click', function(){ calViewDate.setMonth(calViewDate.getMonth()-1); renderMiniCalendar(); });
+  document.getElementById('nextMonth').addEventListener('click', function(){ calViewDate.setMonth(calViewDate.getMonth()+1); renderMiniCalendar(); });
+  document.getElementById('cancelBtn').addEventListener('click', function(){ document.getElementById('addForm').classList.remove('open'); });
+  document.getElementById('saveBtn').addEventListener('click', async function(){
+    var payload = { team: team, title: document.getElementById('fTitle').value, date: document.getElementById('fDate').value, owner: document.getElementById('fOwner').value };
+    if(!payload.title || !payload.date){ alert('일정명과 날짜를 입력해주세요.'); return; }
+    if(supabase){
+      var { error } = await supabase.from('schedules').insert(payload);
+      if(error){ alert('저장 실패: ' + error.message); return; }
+    }
+    calEvents.push(payload);
+    document.getElementById('addForm').classList.remove('open');
+    document.getElementById('fTitle').value = '';
+    renderMiniCalendar();
+  });
+
   async function loadDashboard(){
     var ok = await requireLogin();
     if(!ok) return; // 로그인 안 되어 있으면 login.html로 이동하고 여기서 중단
+    await checkPermission();
 
     document.getElementById('pageTitle').textContent = TEAM_LABEL[team];
     document.getElementById('teamBadge').textContent = TEAM_LABEL[team] + ' · ' + TEAM_SUBLABEL[team];
     setSidebarActive();
+
+    if(supabase){
+      var { data: schedules } = await supabase.from('schedules').select('*').eq('team', team);
+      calEvents = schedules || [];
+    }
+    renderMiniCalendar();
 
     if(!supabase){
       // Supabase 미연결 상태 → 데모 데이터 표시
@@ -501,23 +616,8 @@
         var weekEndD = new Date(); weekEndD.setDate(weekEndD.getDate() + 7);
         var todayStr = todayD.toISOString().slice(0,10);
         var weekEndStr = weekEndD.toISOString().slice(0,10);
-        var { data: schedules } = await supabase.from('schedules').select('*').eq('team', team);
-        var weekEvents = (schedules || []).filter(function(ev){ return ev.date >= todayStr && ev.date <= weekEndStr; })
-          .sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
-
+        var weekEvents = calEvents.filter(function(ev){ return ev.date >= todayStr && ev.date <= weekEndStr; });
         document.getElementById('statB').textContent = weekEvents.length;
-        var schedWrap = document.getElementById('scheduleList');
-        if(weekEvents.length){
-          schedWrap.innerHTML = '';
-          weekEvents.slice(0,5).forEach(function(ev){
-            var row = document.createElement('div');
-            row.className = 'file-row';
-            row.innerHTML = '<span class="fname"><span class="file-icon">CAL</span>'+ev.title+(ev.owner ? ' <span class="file-meta">· '+ev.owner+'</span>' : '')+'</span><span class="file-meta">'+ev.date+'</span>';
-            schedWrap.appendChild(row);
-          });
-        } else {
-          schedWrap.innerHTML = '<div class="file-row"><span class="fname">이번 주 예정된 일정이 없습니다.</span></div>';
-        }
       }catch(_e){
         document.getElementById('statB').textContent = '–';
       }
