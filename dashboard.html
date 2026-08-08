@@ -120,6 +120,26 @@
   @media (max-width:640px){.add-form-grid{grid-template-columns:1fr;}}
   .add-form-grid label{display:block; font-family:var(--mono); font-size:10.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:8px;}
   .add-form-grid input{width:100%; border:none; border-bottom:1px solid var(--line-strong); background:transparent; padding:8px 2px; font-size:14px; outline:none;}
+
+  .date-field{position:relative;}
+  .date-display{
+    width:100%; text-align:left; border:none; border-bottom:1px solid var(--line-strong); background:transparent;
+    padding:8px 2px; font-size:14px; font-family:var(--body); color:var(--ink); cursor:pointer;
+  }
+  .date-picker{
+    position:absolute; top:calc(100% + 8px); left:0; z-index:40; width:260px;
+    background:var(--panel); border:1px solid var(--line-strong); border-radius:6px; box-shadow:0 16px 40px rgba(0,0,0,0.16); padding:14px;
+  }
+  .dp-nav{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+  .dp-nav button{background:none; border:1px solid var(--line-strong); width:24px; height:24px; border-radius:50%; cursor:pointer; font-size:12px;}
+  .dp-nav span{font-family:var(--display); font-weight:700; font-size:13px;}
+  .dp-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:2px;}
+  .dp-dow{text-align:center; font-family:var(--mono); font-size:9px; color:var(--ink-dim); padding:4px 0;}
+  .dp-day{text-align:center; font-family:var(--body); font-size:12px; padding:6px 0; border-radius:50%; cursor:pointer;}
+  .dp-day:hover{background:var(--bg-alt);}
+  .dp-day.selected{background:var(--ink); color:var(--bg);}
+  .dp-day.today:not(.selected){border:1px solid var(--line-strong);}
+  .dp-day.empty{visibility:hidden;}
   .add-form-actions{margin-top:16px; display:flex; gap:10px;}
   .add-form-actions .save-btn{background:var(--ink); color:var(--bg); border:none; font-family:var(--mono); font-size:11.5px; padding:10px 18px; border-radius:1px; cursor:pointer;}
   .add-form-actions .cancel-btn{background:none; border:1px solid var(--line-strong); font-family:var(--mono); font-size:11.5px; padding:10px 18px; border-radius:1px; cursor:pointer;}
@@ -290,7 +310,18 @@
       <div class="add-form" id="addForm">
         <div class="add-form-grid">
           <div><label>일정명</label><input id="fTitle" placeholder="예: Daddy Bot 촬영"></div>
-          <div><label>날짜</label><input id="fDate" type="date"></div>
+          <div class="date-field">
+            <label>날짜</label>
+            <button type="button" class="date-display" id="fDateDisplay">날짜 선택</button>
+            <div class="date-picker" id="fDatePicker" hidden>
+              <div class="dp-nav">
+                <button type="button" id="dpPrev">‹</button>
+                <span id="dpLabel">–</span>
+                <button type="button" id="dpNext">›</button>
+              </div>
+              <div class="dp-grid" id="dpGrid"></div>
+            </div>
+          </div>
           <div><label>담당자</label><input id="fOwner" placeholder="담당자"></div>
         </div>
         <div class="add-form-actions">
@@ -512,8 +543,64 @@
     }
   }
 
+  var selectedDate = null;
+  var dpViewDate = new Date();
+
+  function fmtDateLabel(dateStr){
+    var d = new Date(dateStr + 'T00:00:00');
+    var dows = ['일','월','화','수','목','금','토'];
+    return (d.getMonth()+1) + '월 ' + d.getDate() + '일 (' + dows[d.getDay()] + '요일)';
+  }
+
+  function renderDatePicker(){
+    var y = dpViewDate.getFullYear(), m = dpViewDate.getMonth();
+    document.getElementById('dpLabel').textContent = y + '년 ' + (m+1) + '월';
+    var grid = document.getElementById('dpGrid');
+    grid.innerHTML = '';
+    ['일','월','화','수','목','금','토'].forEach(function(d){
+      var el = document.createElement('div'); el.className = 'dp-dow'; el.textContent = d; grid.appendChild(el);
+    });
+    var firstDow = new Date(y, m, 1).getDay();
+    var daysInMonth = new Date(y, m+1, 0).getDate();
+    var todayStr = new Date().toISOString().slice(0,10);
+    for(var i=0; i<firstDow; i++){
+      var e = document.createElement('div'); e.className = 'dp-day empty'; grid.appendChild(e);
+    }
+    for(var d=1; d<=daysInMonth; d++){
+      var dateStr = y + '-' + String(m+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+      var cell = document.createElement('div');
+      cell.className = 'dp-day' + (dateStr === todayStr ? ' today' : '') + (dateStr === selectedDate ? ' selected' : '');
+      cell.textContent = d;
+      cell.dataset.date = dateStr;
+      cell.addEventListener('click', function(){
+        selectedDate = this.dataset.date;
+        document.getElementById('fDateDisplay').textContent = fmtDateLabel(selectedDate);
+        document.getElementById('fDatePicker').hidden = true;
+        renderDatePicker();
+      });
+      grid.appendChild(cell);
+    }
+  }
+
+  document.getElementById('fDateDisplay').addEventListener('click', function(e){
+    e.stopPropagation();
+    var picker = document.getElementById('fDatePicker');
+    picker.hidden = !picker.hidden;
+    if(!picker.hidden) renderDatePicker();
+  });
+  document.getElementById('dpPrev').addEventListener('click', function(e){ e.stopPropagation(); dpViewDate.setMonth(dpViewDate.getMonth()-1); renderDatePicker(); });
+  document.getElementById('dpNext').addEventListener('click', function(e){ e.stopPropagation(); dpViewDate.setMonth(dpViewDate.getMonth()+1); renderDatePicker(); });
+  document.getElementById('fDatePicker').addEventListener('click', function(e){ e.stopPropagation(); });
+  document.addEventListener('click', function(){ document.getElementById('fDatePicker').hidden = true; });
+
+  function setSelectedDate(dateStr){
+    selectedDate = dateStr;
+    document.getElementById('fDateDisplay').textContent = fmtDateLabel(dateStr);
+    dpViewDate = new Date(dateStr + 'T00:00:00');
+  }
+
   function openAddForDate(dateStr){
-    document.getElementById('fDate').value = dateStr;
+    setSelectedDate(dateStr);
     document.getElementById('addForm').classList.add('open');
     document.getElementById('fTitle').focus();
   }
@@ -522,7 +609,7 @@
   document.getElementById('nextMonth').addEventListener('click', function(){ calViewDate.setMonth(calViewDate.getMonth()+1); renderMiniCalendar(); });
   document.getElementById('cancelBtn').addEventListener('click', function(){ document.getElementById('addForm').classList.remove('open'); });
   document.getElementById('saveBtn').addEventListener('click', async function(){
-    var payload = { team: team, title: document.getElementById('fTitle').value, date: document.getElementById('fDate').value, owner: document.getElementById('fOwner').value };
+    var payload = { team: team, title: document.getElementById('fTitle').value, date: selectedDate, owner: document.getElementById('fOwner').value };
     if(!payload.title || !payload.date){ alert('일정명과 날짜를 입력해주세요.'); return; }
     if(supabase){
       var { error } = await supabase.from('schedules').insert(payload);
